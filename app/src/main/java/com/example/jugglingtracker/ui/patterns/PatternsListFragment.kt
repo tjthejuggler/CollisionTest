@@ -29,7 +29,8 @@ class PatternsListFragment : Fragment() {
         ViewModelFactory(
             app.patternRepository,
             app.testSessionRepository,
-            app.tagRepository
+            app.tagRepository,
+            requireContext()
         )
     }
 
@@ -53,6 +54,7 @@ class PatternsListFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
         setupFab()
+        setupSortButtons()
         observeViewModel()
     }
 
@@ -105,7 +107,7 @@ class PatternsListFragment : Fragment() {
         patternAdapter = PatternListAdapter(
             onPatternClick = { pattern ->
                 val action = PatternsListFragmentDirections
-                    .actionPatternsListToPatternDetail(pattern.id)
+                    .actionPatternsToPatternDetail(pattern.id)
                 findNavController().navigate(action)
             },
             onPatternLongClick = { pattern ->
@@ -116,7 +118,7 @@ class PatternsListFragment : Fragment() {
             }
         )
 
-        binding.recyclerViewPatterns.apply {
+        binding.patternsRecyclerview.apply {
             adapter = patternAdapter
             layoutManager = LinearLayoutManager(requireContext())
         }
@@ -125,8 +127,26 @@ class PatternsListFragment : Fragment() {
     private fun setupFab() {
         binding.fabAddPattern.setOnClickListener {
             val action = PatternsListFragmentDirections
-                .actionPatternsListToAddEditPattern(-1L) // -1 indicates new pattern
+                .actionPatternsToAddPattern(-1L) // -1 indicates new pattern
             findNavController().navigate(action)
+        }
+    }
+
+    private fun setupSortButtons() {
+        binding.btnSortName.setOnClickListener {
+            viewModel.updateSortOption(SortOption.NAME)
+        }
+
+        binding.btnSortDifficulty.setOnClickListener {
+            viewModel.updateSortOption(SortOption.DIFFICULTY_ASC)
+        }
+
+        binding.btnSortBalls.setOnClickListener {
+            viewModel.updateSortOption(SortOption.NUM_BALLS)
+        }
+
+        binding.btnSortRecent.setOnClickListener {
+            viewModel.updateSortOption(SortOption.RECENT)
         }
     }
 
@@ -140,11 +160,11 @@ class PatternsListFragment : Fragment() {
                         
                         // Show/hide empty state
                         if (patterns.isEmpty()) {
-                            binding.textEmptyState.visibility = View.VISIBLE
-                            binding.recyclerViewPatterns.visibility = View.GONE
+                            binding.emptyState.visibility = View.VISIBLE
+                            binding.patternsRecyclerview.visibility = View.GONE
                         } else {
-                            binding.textEmptyState.visibility = View.GONE
-                            binding.recyclerViewPatterns.visibility = View.VISIBLE
+                            binding.emptyState.visibility = View.GONE
+                            binding.patternsRecyclerview.visibility = View.VISIBLE
                         }
                     }
                 }
@@ -152,13 +172,6 @@ class PatternsListFragment : Fragment() {
                 // Observe UI state
                 launch {
                     viewModel.uiState.collect { state ->
-                        // Show/hide loading
-                        binding.progressBar.visibility = if (state.isLoading) {
-                            View.VISIBLE
-                        } else {
-                            View.GONE
-                        }
-
                         // Show error messages
                         state.error?.let { error ->
                             Snackbar.make(binding.root, error, Snackbar.LENGTH_LONG).show()
@@ -185,12 +198,12 @@ class PatternsListFragment : Fragment() {
                 when (which) {
                     0 -> { // View Details
                         val action = PatternsListFragmentDirections
-                            .actionPatternsListToPatternDetail(pattern.id)
+                            .actionPatternsToPatternDetail(pattern.id)
                         findNavController().navigate(action)
                     }
                     1 -> { // Edit
                         val action = PatternsListFragmentDirections
-                            .actionPatternsListToAddEditPattern(pattern.id)
+                            .actionPatternsToAddPattern(pattern.id)
                         findNavController().navigate(action)
                     }
                     2 -> { // Clone
@@ -208,7 +221,7 @@ class PatternsListFragment : Fragment() {
         // This would be implemented as part of the key workflows
         // For now, navigate to add/edit with clone flag
         val action = PatternsListFragmentDirections
-            .actionPatternsListToAddEditPattern(-1L) // Will be enhanced for cloning
+            .actionPatternsToAddPattern(-1L) // Will be enhanced for cloning
         findNavController().navigate(action)
     }
 

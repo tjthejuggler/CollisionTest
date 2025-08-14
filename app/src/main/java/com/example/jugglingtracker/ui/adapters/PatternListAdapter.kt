@@ -39,21 +39,13 @@ class PatternListAdapter(
         fun bind(pattern: Pattern) {
             binding.apply {
                 // Pattern name
-                textPatternName.text = pattern.name
+                tvPatternName.text = pattern.name
 
                 // Difficulty
-                textDifficulty.text = pattern.difficulty.toString()
+                tvDifficulty.text = pattern.difficulty.toString()
                 
                 // Number of balls
-                textNumBalls.text = pattern.numBalls.toString()
-
-                // Last tested date
-                textLastTested.text = if (pattern.lastTested != null) {
-                    val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-                    dateFormat.format(Date(pattern.lastTested))
-                } else {
-                    "Never tested"
-                }
+                tvBallCount.text = "${pattern.numBalls} balls"
 
                 // Set difficulty background color based on level
                 val difficultyColor = when {
@@ -62,7 +54,7 @@ class PatternListAdapter(
                     pattern.difficulty <= 8 -> android.graphics.Color.parseColor("#F44336") // Red - Hard
                     else -> android.graphics.Color.parseColor("#9C27B0") // Purple - Expert
                 }
-                textDifficulty.setBackgroundColor(difficultyColor)
+                tvDifficulty.setBackgroundColor(difficultyColor)
 
                 // Click listeners
                 root.setOnClickListener {
@@ -74,21 +66,9 @@ class PatternListAdapter(
                     true
                 }
 
-                // Delete button (if delete callback is provided)
-                onDeleteClick?.let { deleteCallback ->
-                    buttonDelete.visibility = android.view.View.VISIBLE
-                    buttonDelete.setOnClickListener {
-                        deleteCallback(pattern)
-                    }
-                } ?: run {
-                    buttonDelete.visibility = android.view.View.GONE
-                }
-
-                // Video indicator
-                imageVideoIndicator.visibility = if (pattern.videoUri != null) {
-                    android.view.View.VISIBLE
-                } else {
-                    android.view.View.GONE
+                // Menu button (using the actual button from layout)
+                btnMenu.setOnClickListener {
+                    onPatternLongClick(pattern) // Use long click for menu
                 }
             }
         }

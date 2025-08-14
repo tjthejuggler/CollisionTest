@@ -40,26 +40,10 @@ class TagAdapter(
         fun bind(tag: Tag) {
             binding.apply {
                 // Tag name
-                textTagName.text = tag.name
+                tvTagName.text = tag.name
 
                 // Tag color indicator
-                viewColorIndicator.setBackgroundColor(tag.color)
-
-                // Set text color based on tag color for better contrast
-                val luminance = (0.299 * Color.red(tag.color) + 
-                               0.587 * Color.green(tag.color) + 
-                               0.114 * Color.blue(tag.color)) / 255
-                val textColor = if (luminance > 0.5) Color.BLACK else Color.WHITE
-                textTagName.setTextColor(textColor)
-
-                // Set background with some transparency
-                val backgroundColor = Color.argb(
-                    50, // Alpha (transparency)
-                    Color.red(tag.color),
-                    Color.green(tag.color),
-                    Color.blue(tag.color)
-                )
-                root.setBackgroundColor(backgroundColor)
+                viewTagColor.setBackgroundColor(tag.color)
 
                 // Click listeners
                 root.setOnClickListener {
@@ -71,24 +55,9 @@ class TagAdapter(
                     true
                 }
 
-                // Edit button (if edit callback is provided)
-                onEditClick?.let { editCallback ->
-                    buttonEdit.visibility = android.view.View.VISIBLE
-                    buttonEdit.setOnClickListener {
-                        editCallback(tag)
-                    }
-                } ?: run {
-                    buttonEdit.visibility = android.view.View.GONE
-                }
-
-                // Delete button (if delete callback is provided)
-                onDeleteClick?.let { deleteCallback ->
-                    buttonDelete.visibility = android.view.View.VISIBLE
-                    buttonDelete.setOnClickListener {
-                        deleteCallback(tag)
-                    }
-                } ?: run {
-                    buttonDelete.visibility = android.view.View.GONE
+                // Delete button
+                btnDeleteTag.setOnClickListener {
+                    onDeleteClick?.invoke(tag)
                 }
             }
         }
@@ -137,13 +106,13 @@ class SelectableTagAdapter(
             
             binding.apply {
                 // Tag name
-                textTagName.text = tag.name
+                tvTagName.text = tag.name
 
                 // Tag color indicator
-                viewColorIndicator.setBackgroundColor(tag.color)
+                viewTagColor.setBackgroundColor(tag.color)
 
                 // Checkbox state
-                checkboxSelected.isChecked = selectableTag.isSelected
+                checkboxTag.isChecked = selectableTag.isSelected
 
                 // Set background color based on selection
                 val backgroundColor = if (selectableTag.isSelected) {
@@ -169,7 +138,7 @@ class SelectableTagAdapter(
                     onTagSelectionChanged(tag, newSelection)
                 }
 
-                checkboxSelected.setOnCheckedChangeListener { _, isChecked ->
+                checkboxTag.setOnCheckedChangeListener { _, isChecked ->
                     if (isChecked != selectableTag.isSelected) {
                         onTagSelectionChanged(tag, isChecked)
                     }
@@ -238,10 +207,10 @@ class TagChipAdapter(
         fun bind(tag: Tag) {
             binding.apply {
                 // Tag name
-                textTagName.text = tag.name
+                tvTagName.text = tag.name
 
                 // Tag color
-                viewColorIndicator.setBackgroundColor(tag.color)
+                viewTagColor.setBackgroundColor(tag.color)
                 
                 // Chip-style background
                 root.setBackgroundColor(Color.argb(
@@ -251,12 +220,8 @@ class TagChipAdapter(
                     Color.blue(tag.color)
                 ))
 
-                // Hide edit button, show only delete (remove) button
-                buttonEdit.visibility = android.view.View.GONE
-                buttonDelete.visibility = android.view.View.VISIBLE
-                buttonDelete.text = "×" // Use × symbol for remove
-                
-                buttonDelete.setOnClickListener {
+                // Use delete button for remove functionality
+                btnDeleteTag.setOnClickListener {
                     onTagRemove(tag)
                 }
             }

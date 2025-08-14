@@ -36,7 +36,7 @@ class ProgressChartViewModel(
     private val rawTestSessions: StateFlow<List<TestSession>> = _patternId
         .filterNotNull()
         .flatMapLatest { id ->
-            testSessionRepository.getTestSessionsForPattern(id)
+            testSessionRepository.getTestSessionsByPattern(id)
         }
         .map { result ->
             _uiState.value = _uiState.value.copy(

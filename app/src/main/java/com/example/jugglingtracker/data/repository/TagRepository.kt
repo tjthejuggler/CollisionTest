@@ -1,6 +1,7 @@
 package com.example.jugglingtracker.data.repository
 
 import com.example.jugglingtracker.data.dao.TagDao
+import com.example.jugglingtracker.data.dao.TagWithUsageCount
 import com.example.jugglingtracker.data.entities.Tag
 import com.example.jugglingtracker.data.entities.PatternTagCrossRef
 import kotlinx.coroutines.flow.Flow
@@ -107,7 +108,7 @@ class TagRepository(
     }
     
     // Usage statistics
-    fun getTagsWithUsageCount(): Flow<Result<List<TagDao.TagWithUsageCount>>> {
+    fun getTagsWithUsageCount(): Flow<Result<List<TagWithUsageCount>>> {
         return tagDao.getTagsWithUsageCount()
             .map { Result.success(it) }
             .catch { e -> emit(Result.failure(e)) }
@@ -252,8 +253,9 @@ class TagRepository(
     // Convenience methods for creating and managing tags
     suspend fun createTag(name: String, color: Int): Result<Long> {
         // Check if tag with this name already exists
-        return when (val existingTagResult = getTagByName(name)) {
-            is Result.Success -> {
+        val existingTagResult = getTagByName(name)
+        return when {
+            existingTagResult.isSuccess -> {
                 if (existingTagResult.getOrNull() != null) {
                     Result.failure(IllegalArgumentException("Tag with name '$name' already exists"))
                 } else {
@@ -261,8 +263,13 @@ class TagRepository(
                     insertTag(tag)
                 }
             }
-            is Result.Failure -> {
+            existingTagResult.isFailure -> {
                 // If there was an error checking, try to create anyway
+                val tag = Tag(name = name, color = color)
+                insertTag(tag)
+            }
+            else -> {
+                // This should never happen, but adding for exhaustiveness
                 val tag = Tag(name = name, color = color)
                 insertTag(tag)
             }
@@ -270,8 +277,9 @@ class TagRepository(
     }
     
     suspend fun updateTagName(tagId: Long, newName: String): Result<Unit> {
-        return when (val tagResult = getTagById(tagId)) {
-            is Result.Success -> {
+        val tagResult = getTagById(tagId)
+        return when {
+            tagResult.isSuccess -> {
                 val tag = tagResult.getOrNull()
                 if (tag != null) {
                     val updatedTag = tag.copy(name = newName)
@@ -280,13 +288,18 @@ class TagRepository(
                     Result.failure(IllegalArgumentException("Tag with id $tagId not found"))
                 }
             }
-            is Result.Failure -> tagResult
+            tagResult.isFailure -> Result.failure(tagResult.exceptionOrNull() ?: Exception("Unknown error"))
+            else -> {
+                // This should never happen, but adding for exhaustiveness
+                Result.failure(IllegalArgumentException("Unexpected result state"))
+            }
         }
     }
     
     suspend fun updateTagColor(tagId: Long, newColor: Int): Result<Unit> {
-        return when (val tagResult = getTagById(tagId)) {
-            is Result.Success -> {
+        val tagResult = getTagById(tagId)
+        return when {
+            tagResult.isSuccess -> {
                 val tag = tagResult.getOrNull()
                 if (tag != null) {
                     val updatedTag = tag.copy(color = newColor)
@@ -295,19 +308,28 @@ class TagRepository(
                     Result.failure(IllegalArgumentException("Tag with id $tagId not found"))
                 }
             }
-            is Result.Failure -> tagResult
+            tagResult.isFailure -> Result.failure(tagResult.exceptionOrNull() ?: Exception("Unknown error"))
+            else -> {
+                // This should never happen, but adding for exhaustiveness
+                Result.failure(IllegalArgumentException("Unexpected result state"))
+            }
         }
     }
     
     // Helper method to get suggested colors (avoiding already used colors)
     suspend fun getSuggestedColors(availableColors: List<Int>): Result<List<Int>> {
-        return when (val usedColorsResult = getAllUsedColors()) {
-            is Result.Success -> {
+        val usedColorsResult = getAllUsedColors()
+        return when {
+            usedColorsResult.isSuccess -> {
                 val usedColors = usedColorsResult.getOrNull() ?: emptyList()
                 val suggestedColors = availableColors.filter { it !in usedColors }
                 Result.success(suggestedColors.ifEmpty { availableColors })
             }
-            is Result.Failure -> usedColorsResult
+            usedColorsResult.isFailure -> Result.failure(usedColorsResult.exceptionOrNull() ?: Exception("Unknown error"))
+            else -> {
+                // This should never happen, but adding for exhaustiveness
+                Result.failure(IllegalArgumentException("Unexpected result state"))
+            }
         }
     }
 }

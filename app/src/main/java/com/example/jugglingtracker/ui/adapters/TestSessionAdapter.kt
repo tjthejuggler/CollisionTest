@@ -46,34 +46,31 @@ class TestSessionAdapter(
             binding.apply {
                 // Pattern name (if showing)
                 if (showPatternName && pattern != null) {
-                    textPatternName.text = pattern.name
-                    textPatternName.visibility = android.view.View.VISIBLE
+                    tvPatternName.text = pattern.name
+                    tvPatternName.visibility = android.view.View.VISIBLE
                 } else {
-                    textPatternName.visibility = android.view.View.GONE
+                    tvPatternName.visibility = android.view.View.GONE
                 }
 
                 // Date
-                val dateFormat = SimpleDateFormat("MMM dd, yyyy 'at' HH:mm", Locale.getDefault())
-                textDate.text = dateFormat.format(Date(session.date))
+                val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+                tvDate.text = dateFormat.format(Date(session.date))
 
                 // Duration
                 val minutes = TimeUnit.MILLISECONDS.toMinutes(session.duration)
                 val seconds = TimeUnit.MILLISECONDS.toSeconds(session.duration) % 60
-                textDuration.text = if (minutes > 0) {
+                tvDuration.text = if (minutes > 0) {
                     "${minutes}m ${seconds}s"
                 } else {
                     "${seconds}s"
                 }
 
-                // Success count and attempts
-                textSuccessCount.text = session.successCount.toString()
-                textAttemptCount.text = session.attemptCount.toString()
-
-                // Success rate
+                // Success rate and attempts
                 val successRate = if (session.attemptCount > 0) {
                     (session.successCount.toDouble() / session.attemptCount.toDouble()) * 100
                 } else 0.0
-                textSuccessRate.text = String.format("%.1f%%", successRate)
+                tvSuccessRate.text = String.format("%.1f%%", successRate)
+                tvAttempts.text = "${session.successCount}/${session.attemptCount}"
 
                 // Set success rate color based on performance
                 val successRateColor = when {
@@ -82,20 +79,17 @@ class TestSessionAdapter(
                     successRate >= 50 -> android.graphics.Color.parseColor("#FF9800") // Orange - Fair
                     else -> android.graphics.Color.parseColor("#F44336") // Red - Poor
                 }
-                textSuccessRate.setTextColor(successRateColor)
+                tvSuccessRate.setTextColor(successRateColor)
 
-                // Notes (if available)
-                if (!session.notes.isNullOrBlank()) {
-                    textNotes.text = session.notes
-                    textNotes.visibility = android.view.View.VISIBLE
-                    labelNotes.visibility = android.view.View.VISIBLE
+                // Notes indicator
+                ivHasNotes.visibility = if (!session.notes.isNullOrBlank()) {
+                    android.view.View.VISIBLE
                 } else {
-                    textNotes.visibility = android.view.View.GONE
-                    labelNotes.visibility = android.view.View.GONE
+                    android.view.View.GONE
                 }
 
                 // Video indicator
-                imageVideoIndicator.visibility = if (session.videoPath != null) {
+                ivHasVideo.visibility = if (session.videoPath != null) {
                     android.view.View.VISIBLE
                 } else {
                     android.view.View.GONE
@@ -111,14 +105,9 @@ class TestSessionAdapter(
                     true
                 }
 
-                // Delete button (if delete callback is provided)
-                onDeleteClick?.let { deleteCallback ->
-                    buttonDelete.visibility = android.view.View.VISIBLE
-                    buttonDelete.setOnClickListener {
-                        deleteCallback(session)
-                    }
-                } ?: run {
-                    buttonDelete.visibility = android.view.View.GONE
+                // Menu button
+                btnMenu.setOnClickListener {
+                    onSessionLongClick(session)
                 }
             }
         }
@@ -166,39 +155,33 @@ class SimpleTestSessionAdapter(
         fun bind(session: TestSession) {
             binding.apply {
                 // Hide pattern name for simple adapter
-                textPatternName.visibility = android.view.View.GONE
+                tvPatternName.visibility = android.view.View.GONE
 
                 // Date
-                val dateFormat = SimpleDateFormat("MMM dd, yyyy 'at' HH:mm", Locale.getDefault())
-                textDate.text = dateFormat.format(Date(session.date))
+                val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+                tvDate.text = dateFormat.format(Date(session.date))
 
                 // Duration
                 val minutes = TimeUnit.MILLISECONDS.toMinutes(session.duration)
                 val seconds = TimeUnit.MILLISECONDS.toSeconds(session.duration) % 60
-                textDuration.text = if (minutes > 0) {
+                tvDuration.text = if (minutes > 0) {
                     "${minutes}m ${seconds}s"
                 } else {
                     "${seconds}s"
                 }
 
-                // Success count and attempts
-                textSuccessCount.text = session.successCount.toString()
-                textAttemptCount.text = session.attemptCount.toString()
-
-                // Success rate
+                // Success rate and attempts
                 val successRate = if (session.attemptCount > 0) {
                     (session.successCount.toDouble() / session.attemptCount.toDouble()) * 100
                 } else 0.0
-                textSuccessRate.text = String.format("%.1f%%", successRate)
+                tvSuccessRate.text = String.format("%.1f%%", successRate)
+                tvAttempts.text = "${session.successCount}/${session.attemptCount}"
 
-                // Notes
-                if (!session.notes.isNullOrBlank()) {
-                    textNotes.text = session.notes
-                    textNotes.visibility = android.view.View.VISIBLE
-                    labelNotes.visibility = android.view.View.VISIBLE
+                // Notes indicator
+                ivHasNotes.visibility = if (!session.notes.isNullOrBlank()) {
+                    android.view.View.VISIBLE
                 } else {
-                    textNotes.visibility = android.view.View.GONE
-                    labelNotes.visibility = android.view.View.GONE
+                    android.view.View.GONE
                 }
 
                 // Click listeners
@@ -206,14 +189,9 @@ class SimpleTestSessionAdapter(
                     onSessionClick(session)
                 }
 
-                // Delete button
-                onDeleteClick?.let { deleteCallback ->
-                    buttonDelete.visibility = android.view.View.VISIBLE
-                    buttonDelete.setOnClickListener {
-                        deleteCallback(session)
-                    }
-                } ?: run {
-                    buttonDelete.visibility = android.view.View.GONE
+                // Menu button for delete functionality
+                btnMenu.setOnClickListener {
+                    onDeleteClick?.invoke(session)
                 }
             }
         }

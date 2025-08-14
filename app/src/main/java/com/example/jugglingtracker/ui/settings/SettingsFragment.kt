@@ -30,7 +30,8 @@ class SettingsFragment : Fragment() {
         ViewModelFactory(
             app.patternRepository,
             app.testSessionRepository,
-            app.tagRepository
+            app.tagRepository,
+            requireContext()
         )
     }
 
@@ -70,7 +71,7 @@ class SettingsFragment : Fragment() {
             }
         )
 
-        binding.recyclerViewTags?.apply {
+        binding.rvTags.apply {
             adapter = tagAdapter
             layoutManager = LinearLayoutManager(requireContext())
         }
@@ -78,23 +79,34 @@ class SettingsFragment : Fragment() {
 
     private fun setupClickListeners() {
         // Add new tag
-        binding.buttonAddTag?.setOnClickListener {
+        binding.btnAddTag.setOnClickListener {
             showAddEditTagDialog(isEdit = false)
         }
 
         // Export data
-        binding.buttonExportData?.setOnClickListener {
+        binding.layoutExportData.setOnClickListener {
             viewModel.exportData()
         }
 
         // Import data
-        binding.buttonImportData?.setOnClickListener {
+        binding.layoutImportData.setOnClickListener {
             viewModel.importData()
         }
 
-        // Reset data
-        binding.buttonResetData?.setOnClickListener {
-            showResetDataConfirmationDialog()
+        // Theme setting (placeholder)
+        binding.tvThemeSummary.setOnClickListener {
+            showThemeSelectionDialog()
+        }
+
+        // Video quality setting (placeholder)
+        binding.tvVideoQualitySummary.setOnClickListener {
+            showVideoQualitySelectionDialog()
+        }
+
+        // Privacy policy (placeholder)
+        binding.layoutPrivacyPolicy.setOnClickListener {
+            // Open privacy policy
+            Snackbar.make(binding.root, "Privacy policy would open here", Snackbar.LENGTH_SHORT).show()
         }
     }
 
@@ -107,16 +119,12 @@ class SettingsFragment : Fragment() {
                         tagAdapter.submitList(tags)
                         
                         // Show/hide empty state
-                        binding.textEmptyTags?.visibility = if (tags.isEmpty()) {
-                            View.VISIBLE
+                        if (tags.isEmpty()) {
+                            binding.emptyTagsState.visibility = View.VISIBLE
+                            binding.rvTags.visibility = View.GONE
                         } else {
-                            View.GONE
-                        }
-                        
-                        binding.recyclerViewTags?.visibility = if (tags.isEmpty()) {
-                            View.GONE
-                        } else {
-                            View.VISIBLE
+                            binding.emptyTagsState.visibility = View.GONE
+                            binding.rvTags.visibility = View.VISIBLE
                         }
                     }
                 }
@@ -124,13 +132,6 @@ class SettingsFragment : Fragment() {
                 // Observe UI state
                 launch {
                     viewModel.uiState.collect { state ->
-                        // Show/hide loading
-                        binding.progressBar?.visibility = if (state.isLoading) {
-                            View.VISIBLE
-                        } else {
-                            View.GONE
-                        }
-
                         // Show error messages
                         state.error?.let { error ->
                             Snackbar.make(binding.root, error, Snackbar.LENGTH_LONG).show()
@@ -149,9 +150,6 @@ class SettingsFragment : Fragment() {
     }
 
     private fun showAddEditTagDialog(isEdit: Boolean) {
-        val dialogView = LayoutInflater.from(requireContext())
-            .inflate(android.R.layout.simple_list_item_2, null)
-        
         val editText = EditText(requireContext()).apply {
             hint = "Tag name"
             if (isEdit) {
@@ -166,13 +164,15 @@ class SettingsFragment : Fragment() {
             .setTitle(title)
             .setView(editText)
             .setPositiveButton(positiveButtonText) { _, _ ->
-                val tagName = editText.text.toString()
-                viewModel.updateNewTagName(tagName)
-                
-                if (isEdit) {
-                    viewModel.updateTag()
-                } else {
-                    viewModel.createTag()
+                val tagName = editText.text.toString().trim()
+                if (tagName.isNotEmpty()) {
+                    viewModel.updateNewTagName(tagName)
+                    
+                    if (isEdit) {
+                        viewModel.updateTag()
+                    } else {
+                        viewModel.createTag()
+                    }
                 }
             }
             .setNegativeButton("Cancel") { _, _ ->
@@ -213,12 +213,35 @@ class SettingsFragment : Fragment() {
             .show()
     }
 
-    private fun showResetDataConfirmationDialog() {
+    private fun showThemeSelectionDialog() {
+        val themes = arrayOf("System Default", "Light", "Dark")
+        var selectedTheme = 0 // Default to system
+
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Reset All Data")
-            .setMessage("This will permanently delete all patterns, test sessions, and tags. This action cannot be undone.")
-            .setPositiveButton("Reset") { _, _ ->
-                viewModel.resetAllData()
+            .setTitle("Choose Theme")
+            .setSingleChoiceItems(themes, selectedTheme) { _, which ->
+                selectedTheme = which
+            }
+            .setPositiveButton("Apply") { _, _ ->
+                binding.tvThemeSummary.text = themes[selectedTheme]
+                Snackbar.make(binding.root, "Theme changed to ${themes[selectedTheme]}", Snackbar.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun showVideoQualitySelectionDialog() {
+        val qualities = arrayOf("Low", "Medium", "High", "Ultra")
+        var selectedQuality = 2 // Default to High
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Video Quality")
+            .setSingleChoiceItems(qualities, selectedQuality) { _, which ->
+                selectedQuality = which
+            }
+            .setPositiveButton("Apply") { _, _ ->
+                binding.tvVideoQualitySummary.text = qualities[selectedQuality]
+                Snackbar.make(binding.root, "Video quality set to ${qualities[selectedQuality]}", Snackbar.LENGTH_SHORT).show()
             }
             .setNegativeButton("Cancel", null)
             .show()

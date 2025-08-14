@@ -1,7 +1,11 @@
 package com.example.jugglingtracker.ui.dialogs
 
 import android.app.Dialog
+import android.graphics.Color
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.view.View
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.jugglingtracker.data.entities.Tag
@@ -10,6 +14,7 @@ import com.example.jugglingtracker.ui.adapters.SelectableTag
 import com.example.jugglingtracker.ui.adapters.SelectableTagAdapter
 import com.example.jugglingtracker.ui.adapters.toSelectableTags
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 
 /**
  * Dialog fragment for selecting tags.
@@ -22,6 +27,7 @@ class TagSelectionDialogFragment : DialogFragment() {
 
     private lateinit var tagAdapter: SelectableTagAdapter
     private var allTags: List<Tag> = emptyList()
+    private var filteredTags: List<Tag> = emptyList()
     private var selectedTags: MutableSet<Tag> = mutableSetOf()
     private var onTagsSelected: ((Set<Tag>) -> Unit)? = null
 
@@ -34,6 +40,7 @@ class TagSelectionDialogFragment : DialogFragment() {
         ): TagSelectionDialogFragment {
             return TagSelectionDialogFragment().apply {
                 this.allTags = allTags
+                this.filteredTags = allTags
                 this.selectedTags = selectedTags.toMutableSet()
                 this.onTagsSelected = onTagsSelected
                 arguments = Bundle().apply {
@@ -49,19 +56,13 @@ class TagSelectionDialogFragment : DialogFragment() {
         val title = arguments?.getString("title") ?: "Select Tags"
         
         setupRecyclerView()
+        setupSearchBar()
+        setupCreateTagSection()
         setupButtons()
         
         return MaterialAlertDialogBuilder(requireContext())
             .setTitle(title)
             .setView(binding.root)
-            .setPositiveButton("Done") { _, _ ->
-                onTagsSelected?.invoke(selectedTags)
-            }
-            .setNegativeButton("Cancel", null)
-            .setNeutralButton("Clear All") { _, _ ->
-                selectedTags.clear()
-                onTagsSelected?.invoke(selectedTags)
-            }
             .create()
     }
 
@@ -72,52 +73,106 @@ class TagSelectionDialogFragment : DialogFragment() {
             } else {
                 selectedTags.remove(tag)
             }
-            updateSelectedCount()
         }
 
-        binding.recyclerViewTags.apply {
+        binding.rvSelectableTags.apply {
             adapter = tagAdapter
             layoutManager = LinearLayoutManager(requireContext())
         }
 
         // Submit initial data
-        val selectableTags = allTags.toSelectableTags(selectedTags)
-        tagAdapter.submitList(selectableTags)
-        
-        updateSelectedCount()
-        updateEmptyState()
+        updateTagsList()
+    }
+
+    private fun setupSearchBar() {
+        binding.etSearchTags.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                filterTags(s?.toString() ?: "")
+            }
+        })
+    }
+
+    private fun setupCreateTagSection() {
+        binding.btnCreateTag.setOnClickListener {
+            val tagName = binding.etNewTagName.text.toString().trim()
+            if (tagName.isNotEmpty()) {
+                createNewTag(tagName)
+            }
+        }
     }
 
     private fun setupButtons() {
-        binding.buttonSelectAll.setOnClickListener {
-            selectedTags.addAll(allTags)
-            tagAdapter.updateSelection(selectedTags)
-            updateSelectedCount()
+        binding.btnCancelTags.setOnClickListener {
+            dismiss()
         }
 
-        binding.buttonClearAll.setOnClickListener {
-            selectedTags.clear()
-            tagAdapter.updateSelection(selectedTags)
-            updateSelectedCount()
+        binding.btnApplyTags.setOnClickListener {
+            onTagsSelected?.invoke(selectedTags)
+            dismiss()
         }
     }
 
-    private fun updateSelectedCount() {
-        binding.textSelectedCount.text = "Selected: ${selectedTags.size}"
-    }
-
-    private fun updateEmptyState() {
-        if (allTags.isEmpty()) {
-            binding.textEmptyState.visibility = android.view.View.VISIBLE
-            binding.recyclerViewTags.visibility = android.view.View.GONE
-            binding.buttonSelectAll.visibility = android.view.View.GONE
-            binding.buttonClearAll.visibility = android.view.View.GONE
+    private fun filterTags(query: String) {
+        filteredTags = if (query.isEmpty()) {
+            allTags
         } else {
-            binding.textEmptyState.visibility = android.view.View.GONE
-            binding.recyclerViewTags.visibility = android.view.View.VISIBLE
-            binding.buttonSelectAll.visibility = android.view.View.VISIBLE
-            binding.buttonClearAll.visibility = android.view.View.VISIBLE
+            allTags.filter { tag ->
+                tag.name.contains(query, ignoreCase = true)
+            }
         }
+        updateTagsList()
+    }
+
+    private fun updateTagsList() {
+        val selectableTags = filteredTags.toSelectableTags(selectedTags)
+        tagAdapter.submitList(selectableTags)
+        
+        // Show/hide empty state
+        if (filteredTags.isEmpty()) {
+            binding.rvSelectableTags.visibility = View.GONE
+            // Could add empty state view if needed
+        } else {
+            binding.rvSelectableTags.visibility = View.VISIBLE
+        }
+    }
+
+    private fun createNewTag(tagName: String) {
+        // Check if tag already exists
+        val existingTag = allTags.find { it.name.equals(tagName, ignoreCase = true) }
+        if (existingTag != null) {
+            Snackbar.make(binding.root, "Tag already exists", Snackbar.LENGTH_SHORT).show()
+            return
+        }
+
+        // Create new tag (in a real app, this would involve the repository)
+        val newTag = Tag(
+            id = 0L, // Will be assigned by database
+            name = tagName,
+            color = generateRandomColor()
+        )
+
+        // Add to lists
+        allTags = allTags + newTag
+        filteredTags = filteredTags + newTag
+        selectedTags.add(newTag)
+
+        // Update UI
+        updateTagsList()
+        binding.etNewTagName.text?.clear()
+        
+        Snackbar.make(binding.root, "Tag created and selected", Snackbar.LENGTH_SHORT).show()
+    }
+
+    private fun generateRandomColor(): Int {
+        val colors = listOf(
+            "#F44336", "#E91E63", "#9C27B0", "#673AB7",
+            "#3F51B5", "#2196F3", "#03A9F4", "#00BCD4",
+            "#009688", "#4CAF50", "#8BC34A", "#CDDC39",
+            "#FFEB3B", "#FFC107", "#FF9800", "#FF5722"
+        )
+        return Color.parseColor(colors.random())
     }
 
     override fun onDestroyView() {

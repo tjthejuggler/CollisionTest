@@ -57,15 +57,6 @@ class VideoManager(private val context: Context) {
         return "pattern_thumbnail_${timestamp}$THUMBNAIL_EXTENSION"
     }
 
-    /**
-     * Get the video directory
-     */
-    fun getVideoDirectory(): File = videoDirectory
-
-    /**
-     * Get the thumbnail directory
-     */
-    fun getThumbnailDirectory(): File = thumbnailDirectory
 
     /**
      * Create a new video file

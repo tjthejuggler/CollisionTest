@@ -57,7 +57,7 @@ class PatternDetailViewModel(
     val recentTestSessions: StateFlow<List<TestSession>> = _patternId
         .filterNotNull()
         .flatMapLatest { id ->
-            testSessionRepository.getTestSessionsForPattern(id)
+            testSessionRepository.getTestSessionsByPattern(id)
         }
         .map { result ->
             result.getOrElse { emptyList() }
@@ -74,7 +74,7 @@ class PatternDetailViewModel(
     val bestTestSession: StateFlow<TestSession?> = _patternId
         .filterNotNull()
         .flatMapLatest { id ->
-            testSessionRepository.getTestSessionsForPattern(id)
+            testSessionRepository.getTestSessionsByPattern(id)
         }
         .map { result ->
             result.getOrElse { emptyList() }
@@ -263,7 +263,7 @@ class PatternDetailViewModel(
     fun getSuccessRate(): StateFlow<Double> = _patternId
         .filterNotNull()
         .flatMapLatest { id ->
-            testSessionRepository.getTestSessionsForPattern(id)
+            testSessionRepository.getTestSessionsByPattern(id)
         }
         .map { result ->
             val sessions = result.getOrElse { emptyList() }
@@ -289,7 +289,7 @@ class PatternDetailViewModel(
     fun getTotalPracticeTime(): StateFlow<Long> = _patternId
         .filterNotNull()
         .flatMapLatest { id ->
-            testSessionRepository.getTestSessionsForPattern(id)
+            testSessionRepository.getTestSessionsByPattern(id)
         }
         .map { result ->
             result.getOrElse { emptyList() }
