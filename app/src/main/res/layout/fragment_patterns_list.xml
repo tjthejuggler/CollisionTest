@@ -71,7 +71,9 @@
                             android:layout_weight="1"
                             android:layout_marginEnd="4dp"
                             android:text="@string/sort_by_name"
-                            android:textSize="12sp"
+                            android:textSize="10sp"
+                            android:maxLines="1"
+                            android:ellipsize="end"
                             app:strokeColor="@color/primary" />
 
                         <com.google.android.material.button.MaterialButton
@@ -83,7 +85,9 @@
                             android:layout_marginStart="4dp"
                             android:layout_marginEnd="4dp"
                             android:text="@string/sort_by_difficulty"
-                            android:textSize="12sp"
+                            android:textSize="10sp"
+                            android:maxLines="1"
+                            android:ellipsize="end"
                             app:strokeColor="@color/primary" />
 
                         <com.google.android.material.button.MaterialButton
@@ -95,7 +99,9 @@
                             android:layout_marginStart="4dp"
                             android:layout_marginEnd="4dp"
                             android:text="@string/sort_by_balls"
-                            android:textSize="12sp"
+                            android:textSize="10sp"
+                            android:maxLines="1"
+                            android:ellipsize="end"
                             app:strokeColor="@color/primary" />
 
                         <com.google.android.material.button.MaterialButton
@@ -106,7 +112,9 @@
                             android:layout_weight="1"
                             android:layout_marginStart="4dp"
                             android:text="@string/sort_by_recent"
-                            android:textSize="12sp"
+                            android:textSize="10sp"
+                            android:maxLines="1"
+                            android:ellipsize="end"
                             app:strokeColor="@color/primary" />
 
                     </LinearLayout>
