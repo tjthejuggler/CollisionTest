@@ -3,6 +3,7 @@ package com.example.jugglingtracker.data.dao
 import androidx.room.*
 import com.example.jugglingtracker.data.entities.Tag
 import com.example.jugglingtracker.data.entities.PatternTagCrossRef
+import com.example.jugglingtracker.data.backup.TagExport
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -133,12 +134,19 @@ interface TagDao {
     
     // Cleanup operations
     @Query("""
-        DELETE FROM tags 
+        DELETE FROM tags
         WHERE id NOT IN (
             SELECT DISTINCT tagId FROM pattern_tag_cross_ref
         )
     """)
     suspend fun deleteUnusedTags()
+    
+    // Backup and restore methods
+    @Query("SELECT id, name, color FROM tags ORDER BY id ASC")
+    suspend fun getAllTagsForExport(): List<TagExport>
+    
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertTagsFromBackup(tags: List<Tag>)
 }
 
 // Data class for tag usage statistics

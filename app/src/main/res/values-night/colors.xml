@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Override colors for dark theme -->
+    
+    <!-- App Theme Colors -->
+    <color name="primary">@color/dark_primary</color>
+    <color name="primary_variant">@color/dark_primary_variant</color>
+    <color name="secondary">@color/dark_secondary</color>
+    <color name="secondary_variant">@color/dark_secondary_variant</color>
+    
+    <!-- Surface Colors -->
+    <color name="surface">@color/dark_surface</color>
+    <color name="surface_variant">@color/dark_surface_variant</color>
+    <color name="background">@color/dark_background</color>
+    <color name="background_secondary">@color/dark_background_secondary</color>
+    
+    <!-- Text Colors -->
+    <color name="on_primary">@color/dark_on_primary</color>
+    <color name="on_secondary">@color/dark_on_secondary</color>
+    <color name="on_surface">@color/dark_on_surface</color>
+    <color name="on_background">@color/dark_on_background</color>
+    <color name="text_primary">@color/dark_text_primary</color>
+    <color name="text_secondary">@color/dark_text_secondary</color>
+    <color name="text_hint">@color/dark_text_hint</color>
+    
+    <!-- Difficulty Colors -->
+    <color name="difficulty_1">@color/dark_difficulty_1</color>
+    <color name="difficulty_2">@color/dark_difficulty_2</color>
+    <color name="difficulty_3">@color/dark_difficulty_3</color>
+    <color name="difficulty_4">@color/dark_difficulty_4</color>
+    <color name="difficulty_5">@color/dark_difficulty_5</color>
+    <color name="difficulty_6">@color/dark_difficulty_6</color>
+    <color name="difficulty_7">@color/dark_difficulty_7</color>
+    <color name="difficulty_8">@color/dark_difficulty_8</color>
+    <color name="difficulty_9">@color/dark_difficulty_9</color>
+    <color name="difficulty_10">@color/dark_difficulty_10</color>
+    
+    <!-- Chart Colors -->
+    <color name="chart_background">@color/dark_chart_background</color>
+    <color name="chart_grid">@color/dark_chart_grid</color>
+    <color name="chart_text">@color/dark_chart_text</color>
+    
+    <!-- Tag Colors -->
+    <color name="tag_red">@color/dark_tag_red</color>
+    <color name="tag_orange">@color/dark_tag_orange</color>
+    <color name="tag_yellow">@color/dark_tag_yellow</color>
+    <color name="tag_green">@color/dark_tag_green</color>
+    <color name="tag_teal">@color/dark_tag_teal</color>
+    <color name="tag_blue">@color/dark_tag_blue</color>
+    <color name="tag_indigo">@color/dark_tag_indigo</color>
+    <color name="tag_purple">@color/dark_tag_purple</color>
+    <color name="tag_pink">@color/dark_tag_pink</color>
+    <color name="tag_gray">@color/dark_tag_gray</color>
+    
+    <!-- Card and Component Colors -->
+    <color name="card_background">@color/dark_card_background</color>
+    <color name="card_border">@color/dark_card_border</color>
+    <color name="divider">@color/dark_divider</color>
+    <color name="ripple">@color/dark_ripple</color>
+    <color name="overlay">@color/dark_overlay</color>
+</resources>

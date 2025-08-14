@@ -45,6 +45,7 @@ class AddEditPatternFragment : Fragment() {
             app.patternRepository,
             app.testSessionRepository,
             app.tagRepository,
+            app.backupRepository,
             requireContext()
         )
     }
@@ -206,6 +207,25 @@ class AddEditPatternFragment : Fragment() {
                 previewVideo(videoFile)
             }
         }
+        
+        // Relationship selection buttons
+        binding.btnSelectPrerequisites.setOnClickListener {
+            showPatternSelectionDialog("Prerequisites") { selectedPatterns ->
+                viewModel.updatePrerequisites(selectedPatterns)
+            }
+        }
+        
+        binding.btnSelectDependents.setOnClickListener {
+            showPatternSelectionDialog("Dependents") { selectedPatterns ->
+                viewModel.updateDependents(selectedPatterns)
+            }
+        }
+        
+        binding.btnSelectRelated.setOnClickListener {
+            showPatternSelectionDialog("Related Patterns") { selectedPatterns ->
+                viewModel.updateRelated(selectedPatterns)
+            }
+        }
     }
 
     private fun observeViewModel() {
@@ -332,6 +352,19 @@ class AddEditPatternFragment : Fragment() {
             
             dialog.show(parentFragmentManager, "tag_selection")
         }
+    }
+
+    private fun showPatternSelectionDialog(title: String, onSelection: (List<com.example.jugglingtracker.data.entities.Pattern>) -> Unit) {
+        // For now, show a simple message that this feature is coming soon
+        // In a full implementation, this would show a dialog with available patterns to select from
+        Snackbar.make(binding.root, "$title selection coming soon!", Snackbar.LENGTH_SHORT).show()
+        
+        // TODO: Implement pattern selection dialog similar to tag selection
+        // This would require:
+        // 1. Getting all available patterns from the repository
+        // 2. Showing them in a selection dialog
+        // 3. Allowing multi-selection
+        // 4. Calling onSelection with the selected patterns
     }
 
     private fun checkCameraPermissionAndRecord() {

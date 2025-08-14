@@ -50,19 +50,12 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Filter Sessions"
-                        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-                        android:textColor="@color/text_primary"
-                        android:layout_marginBottom="12dp" />
 
                     <com.google.android.material.chip.ChipGroup
                         android:id="@+id/chip_group_filter"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:chipSpacingHorizontal="8dp"
+                        app:chipSpacingHorizontal="4dp"
                         app:singleSelection="true"
                         app:selectionRequired="true">
 

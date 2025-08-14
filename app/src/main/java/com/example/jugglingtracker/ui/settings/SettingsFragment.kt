@@ -31,6 +31,7 @@ class SettingsFragment : Fragment() {
             app.patternRepository,
             app.testSessionRepository,
             app.tagRepository,
+            app.backupRepository,
             requireContext()
         )
     }

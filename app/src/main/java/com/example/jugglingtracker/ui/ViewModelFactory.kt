@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.jugglingtracker.data.repository.PatternRepository
 import com.example.jugglingtracker.data.repository.TestSessionRepository
 import com.example.jugglingtracker.data.repository.TagRepository
+import com.example.jugglingtracker.data.repository.BackupRepository
 import com.example.jugglingtracker.ui.addedit.AddEditPatternViewModel
 import com.example.jugglingtracker.ui.detail.PatternDetailViewModel
 import com.example.jugglingtracker.ui.history.TestHistoryViewModel
@@ -21,6 +22,7 @@ class ViewModelFactory(
     private val patternRepository: PatternRepository,
     private val testSessionRepository: TestSessionRepository,
     private val tagRepository: TagRepository,
+    private val backupRepository: BackupRepository,
     private val context: Context
 ) : ViewModelProvider.Factory {
 
@@ -43,7 +45,7 @@ class ViewModelFactory(
                 TestHistoryViewModel(testSessionRepository, patternRepository) as T
             }
             modelClass.isAssignableFrom(SettingsViewModel::class.java) -> {
-                SettingsViewModel(tagRepository) as T
+                SettingsViewModel(tagRepository, backupRepository) as T
             }
             else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
         }

@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- Dialog Title -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/dialog_stats_info_title"
+            android:textAppearance="?attr/textAppearanceHeadline6"
+            android:textColor="?attr/colorOnSurface"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Weekly System Section -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/dialog_stats_info_weekly_system"
+            android:textAppearance="?attr/textAppearanceSubtitle1"
+            android:textColor="?attr/colorPrimary"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/dialog_stats_info_weekly_description"
+            android:textAppearance="?attr/textAppearanceBody2"
+            android:textColor="?attr/colorOnSurface"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Point Values Section -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/dialog_stats_info_point_values"
+            android:textAppearance="?attr/textAppearanceSubtitle1"
+            android:textColor="?attr/colorPrimary"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Point Values List -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/dialog_stats_info_pattern_created"
+                android:textAppearance="?attr/textAppearanceBody2"
+                android:textColor="?attr/colorOnSurface"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/dialog_stats_info_test_completed"
+                android:textAppearance="?attr/textAppearanceBody2"
+                android:textColor="?attr/colorOnSurface"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/dialog_stats_info_video_recorded"
+                android:textAppearance="?attr/textAppearanceBody2"
+                android:textColor="?attr/colorOnSurface"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/dialog_stats_info_pattern_edited"
+                android:textAppearance="?attr/textAppearanceBody2"
+                android:textColor="?attr/colorOnSurface"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/dialog_stats_info_test_started"
+                android:textAppearance="?attr/textAppearanceBody2"
+                android:textColor="?attr/colorOnSurface"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/dialog_stats_info_video_trimmed"
+                android:textAppearance="?attr/textAppearanceBody2"
+                android:textColor="?attr/colorOnSurface"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/dialog_stats_info_progress_viewed"
+                android:textAppearance="?attr/textAppearanceBody2"
+                android:textColor="?attr/colorOnSurface"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/dialog_stats_info_test_cancelled"
+                android:textAppearance="?attr/textAppearanceBody2"
+                android:textColor="?attr/colorOnSurface"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/dialog_stats_info_pattern_tagged"
+                android:textAppearance="?attr/textAppearanceBody2"
+                android:textColor="?attr/colorOnSurface"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/dialog_stats_info_history_viewed"
+                android:textAppearance="?attr/textAppearanceBody2"
+                android:textColor="?attr/colorOnSurface"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/dialog_stats_info_app_opened"
+                android:textAppearance="?attr/textAppearanceBody2"
+                android:textColor="?attr/colorOnSurface"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/dialog_stats_info_pattern_viewed"
+                android:textAppearance="?attr/textAppearanceBody2"
+                android:textColor="?attr/colorOnSurface"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/dialog_stats_info_pattern_searched"
+                android:textAppearance="?attr/textAppearanceBody2"
+                android:textColor="?attr/colorOnSurface"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/dialog_stats_info_pattern_sorted"
+                android:textAppearance="?attr/textAppearanceBody2"
+                android:textColor="?attr/colorOnSurface"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/dialog_stats_info_settings_accessed"
+                android:textAppearance="?attr/textAppearanceBody2"
+                android:textColor="?attr/colorOnSurface" />
+
+        </LinearLayout>
+
+        <!-- Duration Bonuses Section -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/dialog_stats_info_duration_bonus"
+            android:textAppearance="?attr/textAppearanceSubtitle1"
+            android:textColor="?attr/colorPrimary"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/dialog_stats_info_test_duration_bonus"
+            android:textAppearance="?attr/textAppearanceBody2"
+            android:textColor="?attr/colorOnSurface"
+            android:layout_marginBottom="4dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/dialog_stats_info_video_duration_bonus"
+            android:textAppearance="?attr/textAppearanceBody2"
+            android:textColor="?attr/colorOnSurface"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Usage Levels Section -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/dialog_stats_info_usage_levels"
+            android:textAppearance="?attr/textAppearanceSubtitle1"
+            android:textColor="?attr/colorPrimary"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Usage Levels List -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/dialog_stats_info_level_inactive"
+                android:textAppearance="?attr/textAppearanceBody2"
+                android:textColor="?attr/colorOnSurface"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/dialog_stats_info_level_beginner"
+                android:textAppearance="?attr/textAppearanceBody2"
+                android:textColor="?attr/colorOnSurface"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/dialog_stats_info_level_casual"
+                android:textAppearance="?attr/textAppearanceBody2"
+                android:textColor="?attr/colorOnSurface"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/dialog_stats_info_level_regular"
+                android:textAppearance="?attr/textAppearanceBody2"
+                android:textColor="?attr/colorOnSurface"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/dialog_stats_info_level_active"
+                android:textAppearance="?attr/textAppearanceBody2"
+                android:textColor="?attr/colorOnSurface"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/dialog_stats_info_level_dedicated"
+                android:textAppearance="?attr/textAppearanceBody2"
+                android:textColor="?attr/colorOnSurface"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/dialog_stats_info_level_expert"
+                android:textAppearance="?attr/textAppearanceBody2"
+                android:textColor="?attr/colorOnSurface"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/dialog_stats_info_level_master"
+                android:textAppearance="?attr/textAppearanceBody2"
+                android:textColor="?attr/colorOnSurface" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>

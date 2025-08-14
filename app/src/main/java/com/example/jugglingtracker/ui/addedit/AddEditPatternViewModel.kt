@@ -363,6 +363,21 @@ class AddEditPatternViewModel(
     }
 
     /**
+     * Update relationship methods for UI callbacks
+     */
+    fun updatePrerequisites(patterns: List<Pattern>) {
+        _selectedPrerequisites.value = patterns.toSet()
+    }
+
+    fun updateDependents(patterns: List<Pattern>) {
+        _selectedDependents.value = patterns.toSet()
+    }
+
+    fun updateRelated(patterns: List<Pattern>) {
+        _selectedRelatedPatterns.value = patterns.toSet()
+    }
+
+    /**
      * Save the pattern
      */
     fun savePattern() {

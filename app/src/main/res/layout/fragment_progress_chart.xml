@@ -50,13 +50,6 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/filter_by_date"
-                        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-                        android:textColor="@color/text_primary"
-                        android:layout_marginBottom="12dp" />
 
                     <!-- Test Length Filter -->
                     <TextView
@@ -72,7 +65,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="16dp"
-                        app:chipSpacingHorizontal="8dp"
+                        app:chipSpacingHorizontal="4dp"
                         app:singleSelection="true"
                         app:selectionRequired="true">
 
@@ -120,7 +113,7 @@
                         android:id="@+id/chip_group_timeframe"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:chipSpacingHorizontal="8dp"
+                        app:chipSpacingHorizontal="4dp"
                         app:singleSelection="true"
                         app:selectionRequired="true">
 
@@ -167,13 +160,6 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/section_progress"
-                        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-                        android:textColor="@color/text_primary"
-                        android:layout_marginBottom="16dp" />
 
                     <!-- Chart Container -->
                     <FrameLayout
@@ -236,13 +222,6 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Best Test Results"
-                        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-                        android:textColor="@color/text_primary"
-                        android:layout_marginBottom="16dp" />
 
                     <!-- Stats Grid -->
                     <LinearLayout

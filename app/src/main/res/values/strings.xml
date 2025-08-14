@@ -16,6 +16,7 @@
     <string name="menu_add_pattern">Add Pattern</string>
     <string name="menu_progress_chart">Progress Chart</string>
     <string name="menu_test_history">Test History</string>
+    <string name="menu_stats">Usage Stats</string>
     <string name="menu_settings">Settings</string>
     <string name="menu_other">Other</string>
     <string name="action_settings">Settings</string>
@@ -315,5 +316,62 @@
     <string name="ready_to_record">Ready to record</string>
     <string name="switch_camera">Switch camera</string>
     <string name="toggle_flash">Toggle flash</string>
+
+    <!-- Stats Screen -->
+    <string name="title_stats">Usage Statistics</string>
+    <string name="stats_current_week">Current Week</string>
+    <string name="stats_weekly_score">Weekly Score</string>
+    <string name="stats_usage_level">Usage Level</string>
+    <string name="stats_points_format">%1$d points</string>
+    <string name="stats_level_format">Level %1$d - %2$s</string>
+    <string name="stats_general_usage">General Usage</string>
+    <string name="stats_patterns_created">Patterns Created</string>
+    <string name="stats_tests_completed">Tests Completed</string>
+    <string name="stats_videos_recorded">Videos Recorded</string>
+    <string name="stats_app_opens">App Opens</string>
+    <string name="stats_total_test_time">Total Test Time</string>
+    <string name="stats_average_weekly_points">Average Weekly Points</string>
+    <string name="stats_weekly_trends">Weekly Trends</string>
+    <string name="stats_this_week">This Week</string>
+    <string name="stats_last_week">Last Week</string>
+    <string name="stats_week_format">Week of %1$s</string>
+    <string name="stats_time_format">%1$d min</string>
+    <string name="stats_no_data">No data available yet</string>
+    <string name="stats_info_button">Information</string>
+    <string name="stats_info_title">Rating System Information</string>
+    <string name="stats_info_description">Learn how the weekly scoring system works and what activities earn points.</string>
+    
+    <!-- Stats Info Dialog -->
+    <string name="dialog_stats_info_title">How the Rating System Works</string>
+    <string name="dialog_stats_info_weekly_system">Weekly Scoring System</string>
+    <string name="dialog_stats_info_weekly_description">Your usage score resets every Monday and tracks your activity throughout the week. Points accumulate to determine your usage level and unlock different accent colors for the app.</string>
+    <string name="dialog_stats_info_point_values">Point Values</string>
+    <string name="dialog_stats_info_pattern_created">• Create Pattern: 10 points</string>
+    <string name="dialog_stats_info_test_completed">• Complete Test: 15 points + duration bonus</string>
+    <string name="dialog_stats_info_video_recorded">• Record Video: 8 points + duration bonus</string>
+    <string name="dialog_stats_info_pattern_edited">• Edit Pattern: 5 points</string>
+    <string name="dialog_stats_info_test_started">• Start Test: 5 points</string>
+    <string name="dialog_stats_info_video_trimmed">• Trim Video: 3 points</string>
+    <string name="dialog_stats_info_progress_viewed">• View Progress: 3 points</string>
+    <string name="dialog_stats_info_test_cancelled">• Cancel Test: 2 points</string>
+    <string name="dialog_stats_info_pattern_tagged">• Tag Pattern: 2 points</string>
+    <string name="dialog_stats_info_history_viewed">• View History: 2 points</string>
+    <string name="dialog_stats_info_app_opened">• Open App: 2 points</string>
+    <string name="dialog_stats_info_pattern_viewed">• View Pattern: 1 point</string>
+    <string name="dialog_stats_info_pattern_searched">• Search Patterns: 1 point</string>
+    <string name="dialog_stats_info_pattern_sorted">• Sort Patterns: 1 point</string>
+    <string name="dialog_stats_info_settings_accessed">• Access Settings: 1 point</string>
+    <string name="dialog_stats_info_usage_levels">Usage Levels</string>
+    <string name="dialog_stats_info_level_inactive">• Inactive (0-9 points): Gray</string>
+    <string name="dialog_stats_info_level_beginner">• Beginner (10-49 points): Green</string>
+    <string name="dialog_stats_info_level_casual">• Casual (50-99 points): Yellow</string>
+    <string name="dialog_stats_info_level_regular">• Regular (100-199 points): Orange</string>
+    <string name="dialog_stats_info_level_active">• Active (200-349 points): Blue</string>
+    <string name="dialog_stats_info_level_dedicated">• Dedicated (350-549 points): Purple</string>
+    <string name="dialog_stats_info_level_expert">• Expert (550-799 points): Red</string>
+    <string name="dialog_stats_info_level_master">• Master (800+ points): Deep Purple</string>
+    <string name="dialog_stats_info_duration_bonus">Duration Bonuses</string>
+    <string name="dialog_stats_info_test_duration_bonus">• Test sessions: +1 point per 30 seconds (max 10 bonus)</string>
+    <string name="dialog_stats_info_video_duration_bonus">• Video recordings: +1 point per 10 seconds (max 5 bonus)</string>
 
 </resources>

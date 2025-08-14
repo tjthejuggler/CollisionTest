@@ -2,7 +2,9 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.hilt.android)
     id("androidx.navigation.safeargs.kotlin")
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.9.10"
 }
 
 android {
@@ -75,11 +77,18 @@ dependencies {
     implementation(libs.glide)
     kapt(libs.glide.compiler)
     
+    // Hilt Dependency Injection
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
+    
     // Additional UI Components
     implementation(libs.androidx.recyclerview)
     implementation(libs.androidx.swiperefreshlayout)
     implementation(libs.androidx.fragment.ktx)
     implementation(libs.androidx.activity.ktx)
+    
+    // Kotlin Serialization
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
     
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

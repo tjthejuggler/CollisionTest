@@ -2,6 +2,7 @@ package com.example.jugglingtracker.data.dao
 
 import androidx.room.*
 import com.example.jugglingtracker.data.entities.*
+import com.example.jugglingtracker.data.backup.*
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -145,4 +146,38 @@ interface PatternDao {
     
     @Query("SELECT AVG(difficulty) FROM patterns")
     suspend fun getAverageDifficulty(): Double?
+    
+    // Backup and restore methods
+    @Query("""
+        SELECT id, name, difficulty, numBalls, videoUri, lastTested
+        FROM patterns ORDER BY id ASC
+    """)
+    suspend fun getAllPatternsForExport(): List<PatternExport>
+    
+    @Query("SELECT patternId, tagId FROM pattern_tag_cross_ref ORDER BY patternId ASC")
+    suspend fun getAllPatternTagCrossRefsForExport(): List<PatternTagCrossRefExport>
+    
+    @Query("SELECT patternId, prerequisiteId FROM pattern_prerequisite_cross_ref ORDER BY patternId ASC")
+    suspend fun getAllPatternPrerequisiteCrossRefsForExport(): List<PatternPrerequisiteCrossRefExport>
+    
+    @Query("SELECT patternId, dependentId FROM pattern_dependent_cross_ref ORDER BY patternId ASC")
+    suspend fun getAllPatternDependentCrossRefsForExport(): List<PatternDependentCrossRefExport>
+    
+    @Query("SELECT patternId, relatedId FROM pattern_related_cross_ref ORDER BY patternId ASC")
+    suspend fun getAllPatternRelatedCrossRefsForExport(): List<PatternRelatedCrossRefExport>
+    
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertPatternsFromBackup(patterns: List<Pattern>)
+    
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertPatternTagCrossRefsFromBackup(crossRefs: List<PatternTagCrossRef>)
+    
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertPatternPrerequisiteCrossRefsFromBackup(crossRefs: List<PatternPrerequisiteCrossRef>)
+    
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertPatternDependentCrossRefsFromBackup(crossRefs: List<PatternDependentCrossRef>)
+    
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertPatternRelatedCrossRefsFromBackup(crossRefs: List<PatternRelatedCrossRef>)
 }

@@ -4,15 +4,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.jugglingtracker.data.entities.Tag
 import com.example.jugglingtracker.data.repository.TagRepository
+import com.example.jugglingtracker.data.repository.BackupRepository
+import com.example.jugglingtracker.data.repository.BackupFileInfo
+import com.example.jugglingtracker.data.backup.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.io.File
 
 /**
  * ViewModel for the settings screen.
  * Handles tag management, app settings, and export/import functionality.
  */
 class SettingsViewModel(
-    private val tagRepository: TagRepository
+    private val tagRepository: TagRepository,
+    private val backupRepository: BackupRepository
 ) : ViewModel() {
 
     // UI State
@@ -230,46 +235,152 @@ class SettingsViewModel(
         )
 
     /**
-     * Export app data (placeholder implementation)
+     * Export app data
      */
     fun exportData() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
             
-            // TODO: Implement actual export functionality
-            // This would involve:
-            // 1. Gathering all data from repositories
-            // 2. Converting to JSON or other format
-            // 3. Writing to file or sharing
-            
-            kotlinx.coroutines.delay(2000) // Simulate export process
-            
-            _uiState.value = _uiState.value.copy(
-                isLoading = false,
-                message = "Export functionality will be implemented in a future update"
-            )
+            try {
+                val backupDir = backupRepository.getDefaultBackupDirectory()
+                val backupFileName = backupRepository.generateBackupFileName()
+                val backupFile = File(backupDir, backupFileName)
+                
+                val progressCallback = object : BackupProgressCallback {
+                    override fun onProgress(progress: Int, message: String) {
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = true,
+                            message = "$message ($progress%)"
+                        )
+                    }
+                    
+                    override fun onComplete() {
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            message = "Backup created successfully: ${backupFile.name}"
+                        )
+                    }
+                    
+                    override fun onError(message: String, exception: Throwable?) {
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            error = "Backup failed: $message"
+                        )
+                    }
+                }
+                
+                val result = backupRepository.createBackup(backupFile, progressCallback)
+                
+                when (result) {
+                    is BackupResult.Success -> {
+                        // Progress callback already handled success
+                    }
+                    is BackupResult.Error -> {
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            error = "Backup failed: ${result.message}"
+                        )
+                    }
+                }
+                
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = "Backup failed: ${e.message}"
+                )
+            }
         }
     }
 
     /**
-     * Import app data (placeholder implementation)
+     * Import app data
      */
     fun importData() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
             
-            // TODO: Implement actual import functionality
-            // This would involve:
-            // 1. Reading data from file
-            // 2. Parsing JSON or other format
-            // 3. Validating data structure
-            // 4. Inserting into database
-            
-            kotlinx.coroutines.delay(2000) // Simulate import process
-            
+            try {
+                // Get available backups
+                val availableBackups = backupRepository.getAvailableBackups()
+                
+                if (availableBackups.isEmpty()) {
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        error = "No backup files found"
+                    )
+                    return@launch
+                }
+                
+                // For now, restore the most recent backup
+                // In a real implementation, you'd show a file picker or list of backups
+                val latestBackup = availableBackups.first()
+                
+                val progressCallback = object : BackupProgressCallback {
+                    override fun onProgress(progress: Int, message: String) {
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = true,
+                            message = "$message ($progress%)"
+                        )
+                    }
+                    
+                    override fun onComplete() {
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            message = "Data restored successfully from ${latestBackup.name}"
+                        )
+                    }
+                    
+                    override fun onError(message: String, exception: Throwable?) {
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            error = "Restore failed: $message"
+                        )
+                    }
+                }
+                
+                val result = backupRepository.restoreBackup(latestBackup.file, progressCallback)
+                
+                when (result) {
+                    is RestoreResult.Success -> {
+                        // Progress callback already handled success
+                    }
+                    is RestoreResult.Error -> {
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            error = "Restore failed: ${result.message}"
+                        )
+                    }
+                }
+                
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = "Restore failed: ${e.message}"
+                )
+            }
+        }
+    }
+    
+    /**
+     * Get available backup files
+     */
+    fun getAvailableBackups(): StateFlow<List<BackupFileInfo>> =
+        flow {
+            emit(backupRepository.getAvailableBackups())
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+    
+    /**
+     * Delete a backup file
+     */
+    fun deleteBackup(backupFile: File) {
+        viewModelScope.launch {
+            val success = backupRepository.deleteBackup(backupFile)
             _uiState.value = _uiState.value.copy(
-                isLoading = false,
-                message = "Import functionality will be implemented in a future update"
+                message = if (success) "Backup deleted successfully" else "Failed to delete backup"
             )
         }
     }

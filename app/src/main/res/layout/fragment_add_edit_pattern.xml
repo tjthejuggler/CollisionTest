@@ -202,6 +202,8 @@
                                 android:maxLines="1"
                                 android:gravity="center"
                                 android:textAppearance="@style/TextAppearance.Material3.HeadlineMedium"
+                                android:textColor="@color/text_primary"
+                                android:textColorHint="@color/text_hint"
                                 tools:text="3" />
 
                         </com.google.android.material.textfield.TextInputLayout>
@@ -394,8 +396,8 @@
                         android:id="@+id/chip_group_tags"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:chipSpacingHorizontal="8dp"
-                        app:chipSpacingVertical="4dp"
+                        app:chipSpacingHorizontal="4dp"
+                        app:chipSpacingVertical="2dp"
                         app:singleLine="false">
 
                         <!-- Tags will be added programmatically -->

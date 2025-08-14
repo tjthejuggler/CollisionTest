@@ -2,6 +2,7 @@ package com.example.jugglingtracker.data.dao
 
 import androidx.room.*
 import com.example.jugglingtracker.data.entities.TestSession
+import com.example.jugglingtracker.data.backup.TestSessionExport
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -125,4 +126,14 @@ interface TestSessionDao {
     
     @Query("SELECT * FROM test_sessions WHERE videoPath IS NOT NULL ORDER BY date DESC")
     fun getTestSessionsWithVideo(): Flow<List<TestSession>>
+    
+    // Backup and restore methods
+    @Query("""
+        SELECT id, patternId, date, duration, successCount, attemptCount, notes, videoPath
+        FROM test_sessions ORDER BY id ASC
+    """)
+    suspend fun getAllTestSessionsForExport(): List<TestSessionExport>
+    
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertTestSessionsFromBackup(testSessions: List<TestSession>)
 }

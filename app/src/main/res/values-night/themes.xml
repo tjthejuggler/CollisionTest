@@ -1,16 +1,41 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+    <!-- Base application theme (Dark Mode). -->
     <style name="Theme.JugglingTracker" parent="Theme.Material3.DayNight">
-        <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/purple_200</item>
-        <item name="colorPrimaryVariant">@color/purple_700</item>
-        <item name="colorOnPrimary">@color/black</item>
-        <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/teal_200</item>
-        <item name="colorSecondaryVariant">@color/teal_200</item>
-        <item name="colorOnSecondary">@color/black</item>
+        <!-- Dynamic Primary brand color. -->
+        <item name="colorPrimary">@color/dark_dynamic_primary</item>
+        <item name="colorPrimaryVariant">@color/dark_dynamic_primary_variant</item>
+        <item name="colorOnPrimary">@color/dark_on_primary</item>
+        <!-- Dynamic Secondary brand color. -->
+        <item name="colorSecondary">@color/dark_dynamic_secondary</item>
+        <item name="colorSecondaryVariant">@color/dark_secondary_variant</item>
+        <item name="colorOnSecondary">@color/dark_on_secondary</item>
+        <!-- Background colors. -->
+        <item name="android:colorBackground">@color/dark_background</item>
+        <item name="colorSurface">@color/dark_surface</item>
+        <item name="colorOnSurface">@color/dark_on_surface</item>
+        <item name="colorOnBackground">@color/dark_on_background</item>
         <!-- Status bar color. -->
-        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+        <item name="android:statusBarColor">@color/dark_background</item>
+        <!-- Navigation bar color. -->
+        <item name="android:navigationBarColor">@color/dark_background</item>
+        <!-- Text colors. -->
+        <item name="android:textColorPrimary">@color/dark_text_primary</item>
+        <item name="android:textColorSecondary">@color/dark_text_secondary</item>
+        <item name="android:textColorHint">@color/dark_text_hint</item>
+        <!-- Window background. -->
+        <item name="android:windowBackground">@color/dark_background</item>
+        <!-- Force dark status bar content for black background -->
+        <item name="android:windowLightStatusBar" tools:targetApi="m">false</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="o">false</item>
         <!-- Customize your theme here. -->
     </style>
+
+    <style name="Theme.JugglingTracker.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="Theme.JugglingTracker.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="Theme.JugglingTracker.PopupOverlay" parent="ThemeOverlay.AppCompat.Dark" />
 </resources>

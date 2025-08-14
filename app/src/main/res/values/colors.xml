@@ -20,6 +20,11 @@
     <color name="secondary">#FF38A169</color>
     <color name="secondary_variant">#FF2F855A</color>
     
+    <!-- Dynamic Theme Colors (will be updated programmatically) -->
+    <color name="dynamic_primary">#FF3182CE</color>
+    <color name="dynamic_primary_variant">#FF2C5AA0</color>
+    <color name="dynamic_secondary">#FF38A169</color>
+    
     <!-- Surface Colors -->
     <color name="surface">#FFFFFFFF</color>
     <color name="surface_variant">#FFF7FAFC</color>
@@ -91,4 +96,66 @@
     <color name="purple_700">#FF3700B3</color>
     <color name="teal_200">#FF03DAC5</color>
     <color name="teal_700">#FF018786</color>
+    <!-- Dark Theme Colors -->
+    <color name="dark_background">#FF000000</color>
+    <color name="dark_background_secondary">#FF121212</color>
+    <color name="dark_surface">#FF1E1E1E</color>
+    <color name="dark_surface_variant">#FF2D2D2D</color>
+    
+    <!-- Dark Theme Text Colors -->
+    <color name="dark_on_primary">#FF000000</color>
+    <color name="dark_on_secondary">#FF000000</color>
+    <color name="dark_on_surface">#FFFFFFFF</color>
+    <color name="dark_on_background">#FFFFFFFF</color>
+    <color name="dark_text_primary">#FFFFFFFF</color>
+    <color name="dark_text_secondary">#FFB3B3B3</color>
+    <color name="dark_text_hint">#FF666666</color>
+    
+    <!-- Dark Theme Primary Colors -->
+    <color name="dark_primary">#FF4A90E2</color>
+    <color name="dark_primary_variant">#FF357ABD</color>
+    <color name="dark_secondary">#FF4CAF50</color>
+    <color name="dark_secondary_variant">#FF388E3C</color>
+    
+    <!-- Dynamic Dark Theme Colors (will be updated programmatically) -->
+    <color name="dark_dynamic_primary">#FF4A90E2</color>
+    <color name="dark_dynamic_primary_variant">#FF357ABD</color>
+    <color name="dark_dynamic_secondary">#FF4CAF50</color>
+    
+    <!-- Dark Theme Card and Component Colors -->
+    <color name="dark_card_background">#FF1E1E1E</color>
+    <color name="dark_card_border">#FF333333</color>
+    <color name="dark_divider">#FF333333</color>
+    <color name="dark_ripple">#1AFFFFFF</color>
+    <color name="dark_overlay">#80000000</color>
+    
+    <!-- Dark Theme Chart Colors -->
+    <color name="dark_chart_background">#FF1E1E1E</color>
+    <color name="dark_chart_grid">#FF333333</color>
+    <color name="dark_chart_text">#FFB3B3B3</color>
+    
+    <!-- Dark Theme Difficulty Colors (adjusted for dark background) -->
+    <color name="dark_difficulty_1">#FF4CAF50</color> <!-- Very Easy - Green -->
+    <color name="dark_difficulty_2">#FF66BB6A</color> <!-- Easy - Light Green -->
+    <color name="dark_difficulty_3">#FFFFC107</color> <!-- Easy-Medium - Yellow -->
+    <color name="dark_difficulty_4">#FFFF9800</color> <!-- Medium-Easy - Orange -->
+    <color name="dark_difficulty_5">#FFFF5722</color> <!-- Medium - Deep Orange -->
+    <color name="dark_difficulty_6">#FFF44336</color> <!-- Medium-Hard - Red -->
+    <color name="dark_difficulty_7">#FFE91E63</color> <!-- Hard - Pink -->
+    <color name="dark_difficulty_8">#FF9C27B0</color> <!-- Very Hard - Purple -->
+    <color name="dark_difficulty_9">#FF673AB7</color> <!-- Expert - Deep Purple -->
+    <color name="dark_difficulty_10">#FF3F51B5</color> <!-- Master - Indigo -->
+    
+    <!-- Dark Theme Tag Colors (adjusted for dark background) -->
+    <color name="dark_tag_red">#FFEF5350</color>
+    <color name="dark_tag_orange">#FFFF7043</color>
+    <color name="dark_tag_yellow">#FFFFC107</color>
+    <color name="dark_tag_green">#FF66BB6A</color>
+    <color name="dark_tag_teal">#FF26A69A</color>
+    <color name="dark_tag_blue">#FF42A5F5</color>
+    <color name="dark_tag_indigo">#FF5C6BC0</color>
+    <color name="dark_tag_purple">#FFAB47BC</color>
+    <color name="dark_tag_pink">#FFEC407A</color>
+    <color name="dark_tag_gray">#FF78909C</color>
+
 </resources>
