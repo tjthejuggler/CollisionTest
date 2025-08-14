@@ -1,0 +1,40 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="?attr/colorOnSurface">
+    
+    <!-- Three juggling balls in a pattern as paths -->
+    <path android:fillColor="@android:color/white"
+        android:pathData="M12,3.5a2.5,2.5 0 1,0 0,5a2.5,2.5 0 1,0 0,-5z" />
+    
+    <path android:fillColor="@android:color/white"
+        android:pathData="M7,12.5a2.5,2.5 0 1,0 0,5a2.5,2.5 0 1,0 0,-5z" />
+    
+    <path android:fillColor="@android:color/white"
+        android:pathData="M17,12.5a2.5,2.5 0 1,0 0,5a2.5,2.5 0 1,0 0,-5z" />
+    
+    <!-- Motion lines -->
+    <path
+        android:pathData="M12,8.5 Q8.5,11 7,12.5"
+        android:strokeColor="@android:color/white"
+        android:strokeWidth="1.5"
+        android:fillColor="@android:color/transparent"
+        android:strokeLineCap="round" />
+    
+    <path
+        android:pathData="M9.5,15 Q12,10 14.5,6"
+        android:strokeColor="@android:color/white"
+        android:strokeWidth="1.5"
+        android:fillColor="@android:color/transparent"
+        android:strokeLineCap="round" />
+    
+    <path
+        android:pathData="M17,12.5 Q15.5,11 12,8.5"
+        android:strokeColor="@android:color/white"
+        android:strokeWidth="1.5"
+        android:fillColor="@android:color/transparent"
+        android:strokeLineCap="round" />
+        
+</vector>

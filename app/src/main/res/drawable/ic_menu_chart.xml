@@ -1,0 +1,42 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="?attr/colorOnSurface">
+    
+    <!-- Chart background -->
+    <path
+        android:pathData="M3,19 L21,19 L21,21 L3,21 Z"
+        android:fillColor="@android:color/white" />
+    
+    <path
+        android:pathData="M3,3 L5,3 L5,19 L3,19 Z"
+        android:fillColor="@android:color/white" />
+    
+    <!-- Progress line chart -->
+    <path
+        android:pathData="M6,16 L9,12 L12,8 L15,10 L18,6"
+        android:strokeColor="@android:color/white"
+        android:strokeWidth="2.5"
+        android:fillColor="@android:color/transparent"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    
+    <!-- Data points as paths -->
+    <path android:fillColor="@android:color/white"
+        android:pathData="M6,14.5a1.5,1.5 0 1,0 0,3a1.5,1.5 0 1,0 0,-3z" />
+    
+    <path android:fillColor="@android:color/white"
+        android:pathData="M9,10.5a1.5,1.5 0 1,0 0,3a1.5,1.5 0 1,0 0,-3z" />
+    
+    <path android:fillColor="@android:color/white"
+        android:pathData="M12,6.5a1.5,1.5 0 1,0 0,3a1.5,1.5 0 1,0 0,-3z" />
+    
+    <path android:fillColor="@android:color/white"
+        android:pathData="M15,8.5a1.5,1.5 0 1,0 0,3a1.5,1.5 0 1,0 0,-3z" />
+    
+    <path android:fillColor="@android:color/white"
+        android:pathData="M18,4.5a1.5,1.5 0 1,0 0,3a1.5,1.5 0 1,0 0,-3z" />
+        
+</vector>

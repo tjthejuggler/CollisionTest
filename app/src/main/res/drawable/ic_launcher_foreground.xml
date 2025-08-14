@@ -1,0 +1,58 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    
+    <!-- Juggling Balls as paths -->
+    <!-- Ball 1 - Top -->
+    <path android:fillColor="#FFE53E3E"
+        android:pathData="M54,27a8,8 0 1,0 0,16a8,8 0 1,0 0,-16z" />
+    
+    <!-- Ball 2 - Bottom Left -->
+    <path android:fillColor="#FF3182CE"
+        android:pathData="M40,57a8,8 0 1,0 0,16a8,8 0 1,0 0,-16z" />
+    
+    <!-- Ball 3 - Bottom Right -->
+    <path android:fillColor="#FF38A169"
+        android:pathData="M68,57a8,8 0 1,0 0,16a8,8 0 1,0 0,-16z" />
+    
+    <!-- Motion Trails -->
+    <!-- Trail for Ball 1 -->
+    <path
+        android:pathData="M54,43 Q45,50 40,57"
+        android:strokeColor="#33E53E3E"
+        android:strokeWidth="3"
+        android:fillColor="@android:color/transparent"
+        android:strokeLineCap="round" />
+    
+    <!-- Trail for Ball 2 -->
+    <path
+        android:pathData="M48,65 Q54,45 60,35"
+        android:strokeColor="#333182CE"
+        android:strokeWidth="3"
+        android:fillColor="@android:color/transparent"
+        android:strokeLineCap="round" />
+    
+    <!-- Trail for Ball 3 -->
+    <path
+        android:pathData="M60,65 Q50,55 46,45"
+        android:strokeColor="#3338A169"
+        android:strokeWidth="3"
+        android:fillColor="@android:color/transparent"
+        android:strokeLineCap="round" />
+    
+    <!-- Juggler Hands (simplified) -->
+    <!-- Left Hand -->
+    <path android:fillColor="#FF4A5568"
+        android:pathData="M35,71a4,4 0 1,0 0,8a4,4 0 1,0 0,-8z" />
+    
+    <!-- Right Hand -->
+    <path android:fillColor="#FF4A5568"
+        android:pathData="M73,71a4,4 0 1,0 0,8a4,4 0 1,0 0,-8z" />
+    
+    <!-- Center Focus Point -->
+    <path android:fillColor="#66000000"
+        android:pathData="M54,52a2,2 0 1,0 0,4a2,2 0 1,0 0,-4z" />
+        
+</vector>

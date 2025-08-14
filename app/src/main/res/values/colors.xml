@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary Colors - Juggling Ball Inspired -->
+    <color name="juggling_red">#FFE53E3E</color>
+    <color name="juggling_red_dark">#FFD53030</color>
+    <color name="juggling_blue">#FF3182CE</color>
+    <color name="juggling_blue_dark">#FF2C5AA0</color>
+    <color name="juggling_green">#FF38A169</color>
+    <color name="juggling_green_dark">#FF2F855A</color>
+    <color name="juggling_yellow">#FFECC94B</color>
+    <color name="juggling_yellow_dark">#FFD69E2E</color>
+    <color name="juggling_orange">#FFED8936</color>
+    <color name="juggling_orange_dark">#FFDD6B20</color>
+    <color name="juggling_purple">#FF805AD5</color>
+    <color name="juggling_purple_dark">#FF6B46C1</color>
+    
+    <!-- App Theme Colors -->
+    <color name="primary">#FF3182CE</color>
+    <color name="primary_variant">#FF2C5AA0</color>
+    <color name="secondary">#FF38A169</color>
+    <color name="secondary_variant">#FF2F855A</color>
+    
+    <!-- Surface Colors -->
+    <color name="surface">#FFFFFFFF</color>
+    <color name="surface_variant">#FFF7FAFC</color>
+    <color name="background">#FFFFFFFF</color>
+    <color name="background_secondary">#FFF7FAFC</color>
+    
+    <!-- Text Colors -->
+    <color name="on_primary">#FFFFFFFF</color>
+    <color name="on_secondary">#FFFFFFFF</color>
+    <color name="on_surface">#FF1A202C</color>
+    <color name="on_background">#FF1A202C</color>
+    <color name="text_primary">#FF1A202C</color>
+    <color name="text_secondary">#FF4A5568</color>
+    <color name="text_hint">#FFA0AEC0</color>
+    
+    <!-- Status Colors -->
+    <color name="success">#FF38A169</color>
+    <color name="warning">#FFECC94B</color>
+    <color name="error">#FFE53E3E</color>
+    <color name="info">#FF3182CE</color>
+    
+    <!-- Difficulty Colors -->
+    <color name="difficulty_1">#FF68D391</color> <!-- Very Easy - Light Green -->
+    <color name="difficulty_2">#FF9AE6B4</color> <!-- Easy - Lighter Green -->
+    <color name="difficulty_3">#FFECC94B</color> <!-- Easy-Medium - Yellow -->
+    <color name="difficulty_4">#FFFBD38D</color> <!-- Medium-Easy - Light Orange -->
+    <color name="difficulty_5">#FFED8936</color> <!-- Medium - Orange -->
+    <color name="difficulty_6">#FFDD6B20</color> <!-- Medium-Hard - Dark Orange -->
+    <color name="difficulty_7">#FFE53E3E</color> <!-- Hard - Red -->
+    <color name="difficulty_8">#FFD53030</color> <!-- Very Hard - Dark Red -->
+    <color name="difficulty_9">#FF9F7AEA</color> <!-- Expert - Purple -->
+    <color name="difficulty_10">#FF805AD5</color> <!-- Master - Dark Purple -->
+    
+    <!-- Chart Colors -->
+    <color name="chart_line_success">#FF38A169</color>
+    <color name="chart_line_attempts">#FF3182CE</color>
+    <color name="chart_line_duration">#FFED8936</color>
+    <color name="chart_background">#FFF7FAFC</color>
+    <color name="chart_grid">#FFE2E8F0</color>
+    <color name="chart_text">#FF4A5568</color>
+    
+    <!-- Tag Colors -->
+    <color name="tag_red">#FFFC8181</color>
+    <color name="tag_orange">#FFFBB6CE</color>
+    <color name="tag_yellow">#FFF6E05E</color>
+    <color name="tag_green">#FF68D391</color>
+    <color name="tag_teal">#FF4FD1C7</color>
+    <color name="tag_blue">#FF63B3ED</color>
+    <color name="tag_indigo">#FF7C3AED</color>
+    <color name="tag_purple">#FF9F7AEA</color>
+    <color name="tag_pink">#FFED64A6</color>
+    <color name="tag_gray">#FFA0AEC0</color>
+    
+    <!-- Card and Component Colors -->
+    <color name="card_background">#FFFFFFFF</color>
+    <color name="card_border">#FFE2E8F0</color>
+    <color name="divider">#FFE2E8F0</color>
+    <color name="ripple">#1A3182CE</color>
+    <color name="overlay">#80000000</color>
+    
+    <!-- Standard Colors -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="transparent">#00000000</color>
+    
+    <!-- Legacy Colors (for compatibility) -->
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+</resources>

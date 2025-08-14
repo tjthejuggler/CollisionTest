@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/nav_patterns">
+
+    <!-- Patterns List Fragment (Main/Home Screen) -->
+    <fragment
+        android:id="@+id/nav_patterns"
+        android:name="com.example.jugglingtracker.ui.patterns.PatternsListFragment"
+        android:label="@string/menu_patterns"
+        tools:layout="@layout/fragment_patterns_list">
+        
+        <action
+            android:id="@+id/action_patterns_to_pattern_detail"
+            app:destination="@id/nav_pattern_detail" />
+        
+        <action
+            android:id="@+id/action_patterns_to_add_pattern"
+            app:destination="@id/nav_add_edit_pattern" />
+    </fragment>
+
+    <!-- Pattern Detail Fragment -->
+    <fragment
+        android:id="@+id/nav_pattern_detail"
+        android:name="com.example.jugglingtracker.ui.detail.PatternDetailFragment"
+        android:label="@string/menu_pattern_detail"
+        tools:layout="@layout/fragment_pattern_detail">
+        
+        <argument
+            android:name="patternId"
+            app:argType="long" />
+        
+        <action
+            android:id="@+id/action_pattern_detail_to_edit_pattern"
+            app:destination="@id/nav_add_edit_pattern" />
+        
+        <action
+            android:id="@+id/action_pattern_detail_to_progress_chart"
+            app:destination="@id/nav_progress_chart" />
+    </fragment>
+
+    <!-- Add/Edit Pattern Fragment -->
+    <fragment
+        android:id="@+id/nav_add_edit_pattern"
+        android:name="com.example.jugglingtracker.ui.addedit.AddEditPatternFragment"
+        android:label="@string/menu_add_pattern"
+        tools:layout="@layout/fragment_add_edit_pattern">
+        
+        <argument
+            android:name="patternId"
+            app:argType="long"
+            android:defaultValue="-1L" />
+    </fragment>
+
+    <!-- Progress Chart Fragment -->
+    <fragment
+        android:id="@+id/nav_progress_chart"
+        android:name="com.example.jugglingtracker.ui.progress.ProgressChartFragment"
+        android:label="@string/menu_progress_chart"
+        tools:layout="@layout/fragment_progress_chart">
+        
+        <argument
+            android:name="patternId"
+            app:argType="long" />
+    </fragment>
+
+    <!-- Test History Fragment -->
+    <fragment
+        android:id="@+id/nav_test_history"
+        android:name="com.example.jugglingtracker.ui.history.TestHistoryFragment"
+        android:label="@string/menu_test_history"
+        tools:layout="@layout/fragment_test_history" />
+
+    <!-- Settings Fragment -->
+    <fragment
+        android:id="@+id/nav_settings"
+        android:name="com.example.jugglingtracker.ui.settings.SettingsFragment"
+        android:label="@string/menu_settings"
+        tools:layout="@layout/fragment_settings" />
+
+</navigation>

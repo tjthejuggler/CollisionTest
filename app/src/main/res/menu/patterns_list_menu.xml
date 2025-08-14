@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_search"
+        android:icon="@drawable/ic_search"
+        android:title="@string/search_patterns"
+        app:showAsAction="ifRoom|collapseActionView"
+        app:actionViewClass="androidx.appcompat.widget.SearchView" />
+
+    <item
+        android:id="@+id/action_sort"
+        android:icon="@drawable/ic_sort"
+        android:title="@string/sort_patterns"
+        app:showAsAction="never">
+        
+        <menu>
+            <item
+                android:id="@+id/action_sort_name"
+                android:title="@string/sort_by_name" />
+            
+            <item
+                android:id="@+id/action_sort_difficulty"
+                android:title="@string/sort_by_difficulty" />
+            
+            <item
+                android:id="@+id/action_sort_balls"
+                android:title="@string/sort_by_balls" />
+            
+            <item
+                android:id="@+id/action_sort_recent"
+                android:title="@string/sort_by_recent" />
+        </menu>
+    </item>
+
+    <item
+        android:id="@+id/action_clear_filters"
+        android:title="Clear Filters"
+        app:showAsAction="never" />
+
+</menu>
