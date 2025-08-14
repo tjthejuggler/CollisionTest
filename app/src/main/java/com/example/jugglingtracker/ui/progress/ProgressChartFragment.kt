@@ -58,7 +58,6 @@ class ProgressChartFragment : Fragment(), OnChartValueSelectedListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
-        setupToolbar()
         setupChart()
         setupFilterControls()
         observeViewModel()
@@ -66,12 +65,6 @@ class ProgressChartFragment : Fragment(), OnChartValueSelectedListener {
         // Load progress data for the specific pattern
         val patternId = args.patternId
         viewModel.loadProgressData(patternId)
-    }
-
-    private fun setupToolbar() {
-        binding.toolbar.setNavigationOnClickListener {
-            findNavController().navigateUp()
-        }
     }
 
     private fun setupChart() {
@@ -347,15 +340,15 @@ class ProgressChartFragment : Fragment(), OnChartValueSelectedListener {
                 val duration = formatDuration(point.sessionDuration)
                 
                 // You could show this in a tooltip, dialog, or update a text view
-                // For now, we'll update the toolbar title temporarily
-                binding.toolbar.title = "$date: $successRate (${point.successCount}/${point.attemptCount})"
+                // For now, we'll show the information in a different way since toolbar was removed
+                // TODO: Consider showing this information in a dedicated text view or toast
             }
         }
     }
 
     override fun onNothingSelected() {
-        // Reset toolbar title or hide tooltip
-        binding.toolbar.title = "Progress Chart"
+        // Reset any displayed information since toolbar was removed
+        // TODO: Consider clearing any dedicated text view that shows selection info
     }
 
     private fun formatDuration(durationMs: Long): String {

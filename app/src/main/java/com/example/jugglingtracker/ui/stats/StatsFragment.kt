@@ -3,8 +3,13 @@ package com.example.jugglingtracker.ui.stats
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.MenuHost
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -20,7 +25,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class StatsFragment : Fragment() {
+class StatsFragment : Fragment(), MenuProvider {
 
     private var _binding: FragmentStatsBinding? = null
     private val binding get() = _binding!!
@@ -40,8 +45,11 @@ class StatsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
+        // Add menu provider for app bar menu
+        val menuHost: MenuHost = requireActivity()
+        menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
+        
         setupRecyclerView()
-        setupClickListeners()
         observeUiState()
     }
 
@@ -53,9 +61,18 @@ class StatsFragment : Fragment() {
         }
     }
 
-    private fun setupClickListeners() {
-        binding.buttonInfo.setOnClickListener {
-            showInfoDialog()
+    // Menu provider methods
+    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+        menuInflater.inflate(R.menu.menu_stats, menu)
+    }
+
+    override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+        return when (menuItem.itemId) {
+            R.id.action_info -> {
+                showInfoDialog()
+                true
+            }
+            else -> false
         }
     }
 

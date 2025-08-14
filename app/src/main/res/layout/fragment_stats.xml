@@ -13,32 +13,6 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Header with Info Button -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="16dp">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/title_stats"
-                android:textAppearance="?attr/textAppearanceHeadline5"
-                android:textColor="?attr/colorOnSurface" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/buttonInfo"
-                style="@style/Widget.Material3.Button.IconButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:contentDescription="@string/stats_info_button"
-                app:icon="@drawable/ic_note"
-                app:iconTint="?attr/colorOnSurface" />
-
-        </LinearLayout>
 
         <!-- Current Week Card -->
         <com.google.android.material.card.MaterialCardView
