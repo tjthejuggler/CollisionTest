@@ -22,4 +22,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "Juggling Tracker"
 include(":app")
- 
+include(":watchimurecorder")
+include(":watchimurecorder")
