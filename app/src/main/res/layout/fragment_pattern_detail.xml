@@ -450,7 +450,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginEnd="4dp"
+            android:layout_marginEnd="8dp"
             android:text="@string/button_start_test"
             android:backgroundTint="@color/primary" />
 
@@ -460,31 +460,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginStart="4dp"
-            android:layout_marginEnd="4dp"
             android:text="@string/button_view_progress"
             app:strokeColor="@color/primary" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_edit"
-            style="@style/Widget.Material3.Button.OutlinedButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="4dp"
-            android:layout_marginEnd="4dp"
-            android:text="@string/button_edit"
-            app:strokeColor="@color/secondary" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_clone"
-            style="@style/Widget.Material3.Button.OutlinedButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="4dp"
-            android:text="@string/button_clone"
-            app:strokeColor="@color/secondary" />
 
     </LinearLayout>
 

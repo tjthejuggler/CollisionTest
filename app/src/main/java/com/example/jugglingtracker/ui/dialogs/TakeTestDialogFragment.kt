@@ -2,6 +2,7 @@ package com.example.jugglingtracker.ui.dialogs
 
 import android.app.Dialog
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.view.View
 import androidx.fragment.app.DialogFragment
 import com.example.jugglingtracker.R
@@ -19,11 +20,19 @@ class TakeTestDialogFragment : DialogFragment() {
     private val binding get() = _binding!!
 
     private var onTestSessionCreated: ((Int, Int, Int, String?) -> Unit)? = null
+    
+    // Timer related variables
+    private var countdownTimer: CountDownTimer? = null
+    private var testTimer: CountDownTimer? = null
+    private var isTimerRunning = false
+    private var isCountdownRunning = false
+    private var elapsedTimeSeconds = 0
+    private var maxTestDurationSeconds = 0
 
     companion object {
         fun newInstance(
             patternName: String,
-            onTestSessionCreated: (durationMinutes: Int, successCount: Int, attemptCount: Int, notes: String?) -> Unit
+            onTestSessionCreated: (durationMinutes: Int, successCount: Int, dropsCount: Int, notes: String?) -> Unit
         ): TakeTestDialogFragment {
             return TakeTestDialogFragment().apply {
                 this.onTestSessionCreated = onTestSessionCreated
@@ -55,24 +64,21 @@ class TakeTestDialogFragment : DialogFragment() {
         // Set initial focus on success count
         binding.etSuccessCount.requestFocus()
         
-        // Add input validation
-        binding.etTotalAttempts.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) {
-                validateAttemptCount()
-            }
-        }
-
-        // Set up chip group listener to update duration field
+        // Set up chip group listener to update max test duration
         binding.chipGroupTestLength.setOnCheckedStateChangeListener { group, checkedIds ->
-            updateDurationFromChip()
+            updateMaxDurationFromChip()
         }
 
-        // Initialize duration based on default selection
-        updateDurationFromChip()
+        // Initialize max duration based on default selection
+        updateMaxDurationFromChip()
+        
+        // Setup timer controls
+        setupTimerControls()
     }
 
     private fun setupButtons() {
         binding.btnCancel.setOnClickListener {
+            stopAllTimers()
             dismiss()
         }
 
@@ -80,67 +86,170 @@ class TakeTestDialogFragment : DialogFragment() {
             saveTestSession()
         }
     }
-
-    private fun updateDurationFromChip() {
-        val checkedChipId = binding.chipGroupTestLength.checkedChipId
-        val durationMinutes = when (checkedChipId) {
-            R.id.chip_short_test -> 5
-            R.id.chip_medium_test -> 15
-            R.id.chip_long_test -> 30
-            else -> 5
+    
+    private fun setupTimerControls() {
+        binding.btnStartTimer.setOnClickListener {
+            startCountdown()
         }
-        binding.etDuration.setText(durationMinutes.toString())
-    }
-
-    private fun validateAttemptCount() {
-        val successCount = binding.etSuccessCount.text.toString().toIntOrNull() ?: 0
-        val attemptCount = binding.etTotalAttempts.text.toString().toIntOrNull() ?: 0
         
-        if (attemptCount < successCount) {
-            binding.tilTotalAttempts.error = "Attempt count cannot be less than success count"
-        } else {
-            binding.tilTotalAttempts.error = null
+        binding.btnStopTimer.setOnClickListener {
+            stopTimer()
+        }
+        
+        binding.btnCancelTimer.setOnClickListener {
+            cancelTimer()
+        }
+        
+        binding.btnResetTimer.setOnClickListener {
+            resetTimer()
         }
     }
+
+    private fun updateMaxDurationFromChip() {
+        val checkedChipId = binding.chipGroupTestLength.checkedChipId
+        maxTestDurationSeconds = when (checkedChipId) {
+            R.id.chip_short_test -> 5 * 60  // 5 minutes
+            R.id.chip_medium_test -> 15 * 60  // 15 minutes
+            R.id.chip_long_test -> 30 * 60  // 30 minutes
+            else -> 5 * 60
+        }
+    }
+    
+    private fun startCountdown() {
+        if (isCountdownRunning || isTimerRunning) return
+        
+        isCountdownRunning = true
+        binding.btnStartTimer.isEnabled = false
+        binding.tvCountdownDisplay.visibility = View.VISIBLE
+        
+        countdownTimer = object : CountDownTimer(5000, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                val secondsLeft = (millisUntilFinished / 1000).toInt() + 1
+                binding.tvCountdownDisplay.text = getString(R.string.timer_countdown_format, secondsLeft)
+            }
+            
+            override fun onFinish() {
+                isCountdownRunning = false
+                binding.tvCountdownDisplay.visibility = View.GONE
+                startTimer()
+            }
+        }.start()
+    }
+    
+    private fun startTimer() {
+        if (isTimerRunning) return
+        
+        isTimerRunning = true
+        elapsedTimeSeconds = 0
+        binding.btnStartTimer.isEnabled = false
+        binding.btnStopTimer.isEnabled = true
+        binding.btnCancelTimer.isEnabled = true
+        binding.tvCountdownDisplay.text = getString(R.string.timer_running)
+        binding.tvCountdownDisplay.visibility = View.VISIBLE
+        
+        testTimer = object : CountDownTimer((maxTestDurationSeconds * 1000).toLong(), 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                elapsedTimeSeconds++
+                updateTimerDisplay()
+            }
+            
+            override fun onFinish() {
+                elapsedTimeSeconds = maxTestDurationSeconds
+                updateTimerDisplay()
+                stopTimer()
+            }
+        }.start()
+    }
+    
+    private fun stopTimer() {
+        testTimer?.cancel()
+        isTimerRunning = false
+        binding.btnStartTimer.isEnabled = true
+        binding.btnStopTimer.isEnabled = false
+        binding.btnCancelTimer.isEnabled = false
+        binding.btnResetTimer.visibility = View.VISIBLE
+        binding.tvCountdownDisplay.text = getString(R.string.timer_stopped)
+        updateTimerDisplay()
+    }
+    
+    private fun cancelTimer() {
+        stopAllTimers()
+        elapsedTimeSeconds = 0
+        binding.btnStartTimer.isEnabled = true
+        binding.btnStopTimer.isEnabled = false
+        binding.btnCancelTimer.isEnabled = false
+        binding.btnResetTimer.visibility = View.GONE
+        binding.tvCountdownDisplay.text = getString(R.string.timer_ready)
+        binding.tvCountdownDisplay.visibility = View.VISIBLE
+        updateTimerDisplay()
+    }
+    
+    private fun resetTimer() {
+        elapsedTimeSeconds = 0
+        binding.btnStartTimer.isEnabled = true
+        binding.btnStopTimer.isEnabled = false
+        binding.btnCancelTimer.isEnabled = false
+        binding.btnResetTimer.visibility = View.GONE
+        binding.tvCountdownDisplay.text = getString(R.string.timer_ready)
+        binding.tvCountdownDisplay.visibility = View.VISIBLE
+        updateTimerDisplay()
+    }
+    
+    private fun stopAllTimers() {
+        countdownTimer?.cancel()
+        testTimer?.cancel()
+        isCountdownRunning = false
+        isTimerRunning = false
+    }
+    
+    private fun updateTimerDisplay() {
+        val minutes = elapsedTimeSeconds / 60
+        val seconds = elapsedTimeSeconds % 60
+        binding.tvTimerDisplay.text = String.format("%02d:%02d", minutes, seconds)
+    }
+
 
     private fun saveTestSession() {
-        val durationMinutes = binding.etDuration.text.toString().toIntOrNull() ?: 5
+        val durationMinutes = if (elapsedTimeSeconds > 0) {
+            // Convert elapsed seconds to minutes, rounding up
+            (elapsedTimeSeconds + 59) / 60
+        } else {
+            // If timer wasn't used, default to chip selection
+            when (binding.chipGroupTestLength.checkedChipId) {
+                R.id.chip_short_test -> 5
+                R.id.chip_medium_test -> 15
+                R.id.chip_long_test -> 30
+                else -> 5
+            }
+        }
+        
         val successCount = binding.etSuccessCount.text.toString().toIntOrNull() ?: 0
-        val attemptCount = binding.etTotalAttempts.text.toString().toIntOrNull() ?: 0
+        val dropsCount = binding.etDropsCount.text.toString().toIntOrNull() ?: 0
         val notes = binding.etNotes.text.toString().takeIf { it.isNotBlank() }
 
         // Validate input
-        if (attemptCount < successCount) {
-            binding.tilTotalAttempts.error = "Attempt count cannot be less than success count"
-            return
-        }
-
-        if (durationMinutes <= 0) {
-            binding.tilDuration.error = "Please enter a valid duration"
-            return
-        }
-
         if (successCount < 0) {
             binding.tilSuccessCount.error = "Success count cannot be negative"
             return
         }
 
-        if (attemptCount <= 0) {
-            binding.tilTotalAttempts.error = "Attempt count must be greater than 0"
+        if (dropsCount < 0) {
+            binding.tilDropsCount.error = "Drops count cannot be negative"
             return
         }
 
         // Clear any existing errors
-        binding.tilDuration.error = null
         binding.tilSuccessCount.error = null
-        binding.tilTotalAttempts.error = null
+        binding.tilDropsCount.error = null
 
-        onTestSessionCreated?.invoke(durationMinutes, successCount, attemptCount, notes)
+        stopAllTimers()
+        onTestSessionCreated?.invoke(durationMinutes, successCount, dropsCount, notes)
         dismiss()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
+        stopAllTimers()
         _binding = null
     }
 }

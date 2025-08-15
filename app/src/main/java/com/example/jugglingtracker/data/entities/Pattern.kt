@@ -5,9 +5,10 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "patterns")
 data class Pattern(
-    @PrimaryKey(autoGenerate = true) 
+    @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     val name: String,
+    val description: String? = null,
     val difficulty: Int, // 1-10 scale
     val numBalls: Int,
     val videoUri: String?,

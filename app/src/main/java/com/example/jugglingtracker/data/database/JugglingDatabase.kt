@@ -23,7 +23,7 @@ import com.example.jugglingtracker.data.entities.*
         UsageEvent::class,
         WeeklyUsage::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
@@ -51,7 +51,8 @@ abstract class JugglingDatabase : RoomDatabase() {
                 .addCallback(DatabaseCallback())
                 .addMigrations(
                     MIGRATION_1_2,
-                    MIGRATION_2_3
+                    MIGRATION_2_3,
+                    MIGRATION_3_4
                 )
                 .fallbackToDestructiveMigration() // Remove in production
                 .build()
@@ -137,6 +138,14 @@ abstract class JugglingDatabase : RoomDatabase() {
                 database.execSQL("CREATE INDEX IF NOT EXISTS `index_usage_events_patternId` ON `usage_events` (`patternId`)")
                 database.execSQL("CREATE INDEX IF NOT EXISTS `index_usage_events_timestamp` ON `usage_events` (`timestamp`)")
                 database.execSQL("CREATE INDEX IF NOT EXISTS `index_usage_events_eventType` ON `usage_events` (`eventType`)")
+            }
+        }
+        
+        // Migration from version 3 to 4: Add description field to patterns table
+        private val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // Add description column to patterns table
+                database.execSQL("ALTER TABLE patterns ADD COLUMN description TEXT")
             }
         }
         

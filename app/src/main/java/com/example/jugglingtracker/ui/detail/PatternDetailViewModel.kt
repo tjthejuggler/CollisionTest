@@ -145,7 +145,7 @@ class PatternDetailViewModel(
     fun createTestSession(
         durationMinutes: Int,
         successCount: Int,
-        attemptCount: Int,
+        dropsCount: Int,
         notes: String? = null
     ) {
         val currentPatternId = _patternId.value ?: return
@@ -158,7 +158,7 @@ class PatternDetailViewModel(
                 date = System.currentTimeMillis(),
                 duration = durationMinutes * 60 * 1000L, // Convert to milliseconds
                 successCount = successCount,
-                attemptCount = attemptCount,
+                attemptCount = successCount + dropsCount, // Total attempts = successful + drops
                 notes = notes,
                 videoPath = null // Will be implemented later
             )

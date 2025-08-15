@@ -24,6 +24,7 @@ import com.example.jugglingtracker.databinding.FragmentPatternDetailBinding
 import com.example.jugglingtracker.ui.ViewModelFactory
 import com.example.jugglingtracker.ui.adapters.SimpleTestSessionAdapter
 import com.example.jugglingtracker.ui.adapters.TagChipAdapter
+import com.example.jugglingtracker.ui.dialogs.TakeTestDialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
@@ -186,8 +187,9 @@ class PatternDetailFragment : Fragment() {
         }
 
         binding.btnViewProgress.setOnClickListener {
-            // Navigate to test history
-            findNavController().navigateUp() // Placeholder navigation
+            // Navigate to progress chart for this pattern
+            val action = PatternDetailFragmentDirections.actionPatternDetailToProgressChart(args.patternId)
+            findNavController().navigate(action)
         }
         
         // Video playback controls
@@ -295,18 +297,32 @@ class PatternDetailFragment : Fragment() {
         val pattern = patternEntity.pattern
         
         binding.apply {
-            // Pattern details
-            tvDescription.text = pattern.name // Use name since description might not exist
+            // Pattern details - show description if available, otherwise show name
+            tvDescription.text = if (!pattern.description.isNullOrBlank()) {
+                pattern.description
+            } else {
+                pattern.name
+            }
             tvDifficulty.text = pattern.difficulty.toString()
             tvBallCount.text = pattern.numBalls.toString()
 
             // Tags - update chip group with selected tags
             chipGroupTags.removeAllViews()
-            patternEntity.tags.forEach { tag ->
-                val chip = com.google.android.material.chip.Chip(requireContext())
-                chip.text = tag.name
-                chip.isClickable = false
-                chipGroupTags.addView(chip)
+            if (patternEntity.tags.isNotEmpty()) {
+                patternEntity.tags.forEach { tag ->
+                    val chip = com.google.android.material.chip.Chip(requireContext())
+                    chip.text = tag.name
+                    chip.isClickable = false
+                    chip.isCloseIconVisible = false
+                    chipGroupTags.addView(chip)
+                }
+            } else {
+                // Show "No tags" message if no tags are present
+                val noTagsChip = com.google.android.material.chip.Chip(requireContext())
+                noTagsChip.text = "No tags"
+                noTagsChip.isClickable = false
+                noTagsChip.isEnabled = false
+                chipGroupTags.addView(noTagsChip)
             }
 
             // Prerequisites, dependents, related patterns
@@ -349,27 +365,13 @@ class PatternDetailFragment : Fragment() {
     }
 
     private fun showTakeTestDialog() {
-        val dialogView = LayoutInflater.from(requireContext())
-            .inflate(R.layout.dialog_add_test_session, null)
+        val patternName = viewModel.patternEntity.value?.pattern?.name ?: "Pattern"
         
-        val editDuration = dialogView.findViewById<EditText>(R.id.et_duration)
-        val editSuccessCount = dialogView.findViewById<EditText>(R.id.et_success_count)
-        val editAttemptCount = dialogView.findViewById<EditText>(R.id.et_total_attempts)
-        val editNotes = dialogView.findViewById<EditText>(R.id.et_notes)
-
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Record Test Session")
-            .setView(dialogView)
-            .setPositiveButton("Save") { _, _ ->
-                val duration = editDuration.text.toString().toIntOrNull() ?: 5
-                val successCount = editSuccessCount.text.toString().toIntOrNull() ?: 0
-                val attemptCount = editAttemptCount.text.toString().toIntOrNull() ?: 0
-                val notes = editNotes.text.toString().takeIf { it.isNotBlank() }
-
-                viewModel.createTestSession(duration, successCount, attemptCount, notes)
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
+        val dialog = TakeTestDialogFragment.newInstance(patternName) { durationMinutes, successCount, dropsCount, notes ->
+            viewModel.createTestSession(durationMinutes, successCount, dropsCount, notes)
+        }
+        
+        dialog.show(parentFragmentManager, "TakeTestDialog")
     }
 
     private fun showClonePatternDialog() {

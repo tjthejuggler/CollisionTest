@@ -130,11 +130,22 @@
     <string name="test_session_date">Date</string>
     <string name="test_session_duration">Duration (minutes)</string>
     <string name="test_session_success_count">Successful Attempts</string>
-    <string name="test_session_attempt_count">Total Attempts</string>
+    <string name="test_session_drops_count">Number of Drops</string>
     <string name="test_session_notes">Notes</string>
     <string name="test_session_notes_hint">Add notes about this session</string>
     <string name="test_session_video">Record Video</string>
     <string name="test_session_length">Test Length</string>
+    <string name="test_session_timer">Timer</string>
+    
+    <!-- Timer Strings -->
+    <string name="button_start_timer">Start</string>
+    <string name="button_stop_timer">Stop</string>
+    <string name="button_cancel_timer">Cancel</string>
+    <string name="button_reset_timer">Reset</string>
+    <string name="timer_ready">Ready to start</string>
+    <string name="timer_countdown_format">Starting in %1$d</string>
+    <string name="timer_running">Timer running</string>
+    <string name="timer_stopped">Timer stopped</string>
     
     <!-- Progress Chart Screen -->
     <string name="title_progress_chart">Progress Chart</string>

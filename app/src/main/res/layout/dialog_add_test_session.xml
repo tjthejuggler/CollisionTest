@@ -7,14 +7,6 @@
     android:orientation="vertical"
     android:padding="24dp">
 
-    <!-- Dialog Title -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/title_add_test_session"
-        android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
-        android:textColor="@color/text_primary"
-        android:layout_marginBottom="16dp" />
 
     <!-- Test Length Selection -->
     <TextView
@@ -78,45 +70,117 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Total Attempts -->
+    <!-- Number of Drops -->
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/til_total_attempts"
+        android:id="@+id/til_drops_count"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        android:hint="@string/test_session_attempt_count"
+        android:hint="@string/test_session_drops_count"
         app:boxStrokeColor="@color/primary"
         app:hintTextColor="@color/primary">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/et_total_attempts"
+            android:id="@+id/et_drops_count"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="number"
             android:maxLines="1"
-            tools:text="10" />
+            tools:text="2" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Duration -->
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/til_duration"
+    <!-- Timer Section -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/test_session_timer"
+        android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
+        android:textColor="@color/text_primary"
+        android:layout_marginBottom="8dp" />
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="vertical"
         android:layout_marginBottom="16dp"
-        android:hint="@string/test_session_duration"
-        app:boxStrokeColor="@color/primary"
-        app:hintTextColor="@color/primary">
+        android:background="@drawable/test_length_background"
+        android:padding="16dp">
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/et_duration"
+        <!-- Timer Display -->
+        <TextView
+            android:id="@+id/tv_timer_display"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="00:00"
+            android:textAppearance="@style/TextAppearance.Material3.DisplayMedium"
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="16dp"
+            android:fontFamily="monospace" />
+
+        <!-- Countdown Display -->
+        <TextView
+            android:id="@+id/tv_countdown_display"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/timer_ready"
+            android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
+            android:textColor="@color/primary"
+            android:layout_marginBottom="16dp"
+            android:visibility="visible" />
+
+        <!-- Timer Controls -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="number"
-            android:maxLines="1"
-            tools:text="15" />
+            android:orientation="horizontal"
+            android:gravity="center">
 
-    </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_start_timer"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:text="@string/button_start_timer"
+                android:backgroundTint="@color/primary"
+                app:icon="@drawable/ic_play" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_stop_timer"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:text="@string/button_stop_timer"
+                android:backgroundTint="@color/primary"
+                android:enabled="false"
+                app:icon="@drawable/ic_pause" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_cancel_timer"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:text="@string/button_cancel_timer"
+                android:textColor="@color/text_secondary"
+                android:enabled="false" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_reset_timer"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/button_reset_timer"
+                android:textColor="@color/text_secondary"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
+    </LinearLayout>
 
     <!-- Notes -->
     <com.google.android.material.textfield.TextInputLayout

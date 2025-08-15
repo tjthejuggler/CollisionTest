@@ -148,6 +148,13 @@ class AddEditPatternFragment : Fragment() {
             }
         }
 
+        // Description field
+        binding.etPatternDescription.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus) {
+                viewModel.updateDescription(binding.etPatternDescription.text.toString())
+            }
+        }
+
         // Difficulty seekbar
         binding.seekbarDifficulty.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
@@ -176,6 +183,7 @@ class AddEditPatternFragment : Fragment() {
         binding.btnSavePattern.setOnClickListener {
             // Update all fields before saving
             viewModel.updateName(binding.etPatternName.text.toString())
+            viewModel.updateDescription(binding.etPatternDescription.text.toString())
             val ballCount = binding.etBallCount.text.toString().toIntOrNull() ?: 3
             viewModel.updateNumBalls(ballCount)
             viewModel.savePattern()
@@ -250,6 +258,14 @@ class AddEditPatternFragment : Fragment() {
                 launch {
                     viewModel.numBalls.collect { numBalls ->
                         binding.etBallCount.setText(numBalls.toString())
+                    }
+                }
+
+                launch {
+                    viewModel.description.collect { description ->
+                        if (binding.etPatternDescription.text.toString() != description) {
+                            binding.etPatternDescription.setText(description)
+                        }
                     }
                 }
 
@@ -334,21 +350,36 @@ class AddEditPatternFragment : Fragment() {
             val dialog = TagSelectionDialogFragment.newInstance(
                 allTags = allTags,
                 selectedTags = selectedTags,
-                title = "Select Tags"
-            ) { newSelectedTags ->
-                // Update selected tags
-                newSelectedTags.forEach { tag ->
-                    if (!selectedTags.contains(tag)) {
-                        viewModel.addTag(tag)
+                title = "Select Tags",
+                onTagsSelected = { newSelectedTags ->
+                    // Update selected tags
+                    newSelectedTags.forEach { tag ->
+                        if (!selectedTags.contains(tag)) {
+                            viewModel.addTag(tag)
+                        }
+                    }
+                    
+                    selectedTags.forEach { tag ->
+                        if (!newSelectedTags.contains(tag)) {
+                            viewModel.removeTag(tag)
+                        }
+                    }
+                },
+                onCreateTag = { tagName, color ->
+                    // Create tag through ViewModel
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        val result = viewModel.createAndAddTag(tagName, color)
+                        if (result.isFailure) {
+                            // Show error message
+                            Snackbar.make(
+                                binding.root,
+                                "Failed to create tag: ${result.exceptionOrNull()?.message}",
+                                Snackbar.LENGTH_LONG
+                            ).show()
+                        }
                     }
                 }
-                
-                selectedTags.forEach { tag ->
-                    if (!newSelectedTags.contains(tag)) {
-                        viewModel.removeTag(tag)
-                    }
-                }
-            }
+            )
             
             dialog.show(parentFragmentManager, "tag_selection")
         }

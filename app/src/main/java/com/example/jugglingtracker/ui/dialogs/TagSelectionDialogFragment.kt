@@ -30,13 +30,15 @@ class TagSelectionDialogFragment : DialogFragment() {
     private var filteredTags: List<Tag> = emptyList()
     private var selectedTags: MutableSet<Tag> = mutableSetOf()
     private var onTagsSelected: ((Set<Tag>) -> Unit)? = null
+    private var onCreateTag: ((String, Int) -> Unit)? = null
 
     companion object {
         fun newInstance(
             allTags: List<Tag>,
             selectedTags: Set<Tag> = emptySet(),
             title: String = "Select Tags",
-            onTagsSelected: (Set<Tag>) -> Unit
+            onTagsSelected: (Set<Tag>) -> Unit,
+            onCreateTag: ((String, Int) -> Unit)? = null
         ): TagSelectionDialogFragment {
             return TagSelectionDialogFragment().apply {
                 this.allTags = allTags

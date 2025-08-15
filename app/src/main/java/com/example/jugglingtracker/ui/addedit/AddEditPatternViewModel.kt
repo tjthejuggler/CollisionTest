@@ -40,6 +40,9 @@ class AddEditPatternViewModel(
     private val _numBalls = MutableStateFlow(3)
     val numBalls: StateFlow<Int> = _numBalls.asStateFlow()
 
+    private val _description = MutableStateFlow("")
+    val description: StateFlow<String> = _description.asStateFlow()
+
     private val _videoUri = MutableStateFlow<String?>(null)
     val videoUri: StateFlow<String?> = _videoUri.asStateFlow()
 
@@ -139,6 +142,7 @@ class AddEditPatternViewModel(
         _name.value = patternEntity.pattern.name
         _difficulty.value = patternEntity.pattern.difficulty
         _numBalls.value = patternEntity.pattern.numBalls
+        _description.value = patternEntity.pattern.description ?: ""
         _videoUri.value = patternEntity.pattern.videoUri
         _selectedTags.value = patternEntity.tags.toSet()
         _selectedPrerequisites.value = patternEntity.prerequisites.toSet()
@@ -167,6 +171,10 @@ class AddEditPatternViewModel(
     fun updateNumBalls(numBalls: Int) {
         _numBalls.value = numBalls.coerceAtLeast(1)
         validateForm()
+    }
+
+    fun updateDescription(description: String) {
+        _description.value = description
     }
 
     fun updateVideoUri(uri: String?) {
@@ -330,6 +338,25 @@ class AddEditPatternViewModel(
     }
 
     /**
+     * Create a new tag and add it to selected tags
+     */
+    suspend fun createAndAddTag(name: String, color: Int): Result<Tag> {
+        return try {
+            val result = tagRepository.createTag(name, color)
+            if (result.isSuccess) {
+                val tagId = result.getOrNull()!!
+                val newTag = Tag(id = tagId, name = name, color = color)
+                _selectedTags.value = _selectedTags.value + newTag
+                Result.success(newTag)
+            } else {
+                Result.failure(result.exceptionOrNull() ?: Exception("Failed to create tag"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
      * Relationship selection methods
      */
     fun togglePrerequisite(pattern: Pattern) {
@@ -394,6 +421,7 @@ class AddEditPatternViewModel(
                 name = _name.value.trim(),
                 difficulty = _difficulty.value,
                 numBalls = _numBalls.value,
+                description = _description.value.trim().takeIf { it.isNotBlank() },
                 videoUri = _videoUri.value?.takeIf { it.isNotBlank() },
                 lastTested = if (currentPatternId != null) {
                     // Keep existing lastTested for edits
@@ -436,9 +464,19 @@ class AddEditPatternViewModel(
                 // For now, we'll assume the relationships are managed properly
             }
 
-            // Save tags
+            // Save tags - ensure new tags are created first
             _selectedTags.value.forEach { tag ->
-                patternRepository.addTagToPattern(patternId, tag.id)
+                if (tag.id == 0L) {
+                    // This is a new tag that needs to be created first
+                    val createResult = tagRepository.createTag(tag.name, tag.color)
+                    if (createResult.isSuccess) {
+                        val newTagId = createResult.getOrNull()!!
+                        patternRepository.addTagToPattern(patternId, newTagId)
+                    }
+                } else {
+                    // Existing tag, just add the association
+                    patternRepository.addTagToPattern(patternId, tag.id)
+                }
             }
 
             // Save prerequisites
@@ -522,6 +560,7 @@ class AddEditPatternViewModel(
         _name.value = ""
         _difficulty.value = 1
         _numBalls.value = 3
+        _description.value = ""
         _videoUri.value = null
         _selectedTags.value = emptySet()
         _selectedPrerequisites.value = emptySet()
