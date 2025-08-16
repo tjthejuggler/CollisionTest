@@ -1,6 +1,6 @@
 # Juggling Progress Tracker
 
-*Last updated: 2025-08-15T11:14:00Z*
+*Last updated: 2025-08-16T06:32:00Z*
 
 ## Overview
 
@@ -776,3 +776,93 @@ watchimurecorder/
 - **Streaming Mode**: Live data streaming to PC for real-time analysis
 
 This Wear OS module provides a complete solution for synchronized IMU data collection from multiple smartwatches, enabling precise biomechanical analysis of juggling movements when combined with video recording.
+
+## Watch IMU Data Endpoint Fix
+
+### Issue Resolution
+*Fixed on 2025-08-16T06:28:00Z*
+
+#### Problem Identified
+The watch IMU integration was failing because the watch HTTP server was missing the `/data` endpoint that the PC recorder application tries to access to retrieve IMU data. This resulted in:
+- Watch indicating successful connection but recordings producing empty IMU folders
+- HTTP 404 errors when PC code attempted to fetch data from the missing `/data` endpoint
+- Watch correctly recording IMU data to local CSV files but unable to serve data via HTTP
+
+#### Root Cause
+- **Watch-side**: The [`HttpServerService.kt`](watchimurecorder/src/main/java/com/example/watchimurecorder/services/HttpServerService.kt:335) only implemented `/ping`, `/start`, `/stop`, and `/status` endpoints
+- **PC-side**: The PC application's `_retrieve_imu_data()` method tries to fetch data from the missing `/data` endpoint
+- **Result**: HTTP 404 error, no data retrieved, empty IMU folders created despite successful recording
+
+#### Solution Implemented
+Added the missing `/data` endpoint to [`HttpServerService.kt`](watchimurecorder/src/main/java/com/example/watchimurecorder/services/HttpServerService.kt) with the following functionality:
+
+1. **New `/data` Endpoint**: Added GET endpoint that reads the most recent CSV file from the watch's recordings directory
+2. **CSV to JSON Conversion**: Implemented `convertCsvToJson()` method that:
+   - Reads CSV files with proper metadata handling
+   - Converts sensor data to JSON format expected by PC application
+   - Handles accelerometer, gyroscope, and magnetometer data
+   - Maintains timestamp precision and data integrity
+3. **Error Handling**: Comprehensive error handling for file access and data conversion
+4. **Updated Endpoint List**: Modified error message to include the new `/data` endpoint
+
+#### Technical Changes
+- **Import Added**: `java.io.File` import for file operations
+- **Endpoint Routing**: Added `/data` case to the HTTP request routing logic
+- **Data Processing**: New methods for reading CSV files and converting to JSON format
+- **Response Format**: JSON array of sensor readings with proper field mapping
+
+#### API Enhancement
+The watch now provides a complete API with the following endpoints:
+
+| Endpoint | Method | Description | Response Format |
+|----------|--------|-------------|-----------------|
+| `/start` | GET | Start IMU data recording | Plain text status |
+| `/stop` | GET | Stop IMU data recording | Plain text status |
+| `/status` | GET | Get current recording status | JSON status object |
+| `/ping` | GET | Health check endpoint | "pong" |
+| `/data` | GET | **NEW**: Retrieve recorded IMU data | JSON array of sensor readings |
+
+#### Data Format
+The new `/data` endpoint returns JSON in the following format:
+```json
+[
+  {
+    "timestamp": 1642680000000000,
+    "accel_x": 0.1,
+    "accel_y": -9.8,
+    "accel_z": 0.2,
+    "gyro_x": 0.01,
+    "gyro_y": 0.02,
+    "gyro_z": -0.01,
+    "mag_x": 45.2,
+    "mag_y": 12.3,
+    "mag_z": -8.7
+  }
+]
+```
+
+#### Next Steps
+1. Rebuild and reinstall the watch app with the updated [`HttpServerService.kt`](watchimurecorder/src/main/java/com/example/watchimurecorder/services/HttpServerService.kt)
+2. Test the complete stillness recorder workflow with PC application
+3. Verify that IMU data is now successfully retrieved and saved by the PC recorder
+
+This fix resolves the core issue preventing successful IMU data synchronization between the watch app and PC recorder application.
+
+#### Build Configuration Fix
+*Fixed on 2025-08-16T06:32:00Z*
+
+**Issue**: After implementing the `/data` endpoint fix, the watch app failed to compile with Gradle build errors:
+- "Unable to find Gradle tasks to build: [:watchimurecorder]" in Android Studio
+- Kotlin compilation errors with type mismatch in `mapOf()` calls
+
+**Root Causes**:
+1. **Duplicate Module Declaration**: The [`settings.gradle.kts`](settings.gradle.kts) file contained a duplicate `include(":watchimurecorder")` line
+2. **Type Inference Issues**: The `mapOf()` call in `convertCsvToJson()` method mixed Long and Double types without explicit type declaration
+
+**Solutions Applied**:
+1. **Fixed Gradle Configuration**: Removed duplicate `include(":watchimurecorder")` line from [`settings.gradle.kts`](settings.gradle.kts)
+2. **Fixed Type Declaration**: Added explicit `mapOf<String, Any>()` type parameter and parentheses around values to ensure proper type casting
+
+**Build Verification**: The watch module now compiles successfully with `./gradlew :watchimurecorder:assemble` completing without errors.
+
+The watch app is now ready for installation and testing with the new `/data` endpoint functionality.

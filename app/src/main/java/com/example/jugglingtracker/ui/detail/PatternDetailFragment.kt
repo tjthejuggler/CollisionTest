@@ -99,7 +99,8 @@ class PatternDetailFragment : Fragment() {
         return when (item.itemId) {
             R.id.action_edit -> {
                 // Navigate to edit pattern
-                findNavController().navigateUp() // Placeholder navigation
+                val action = PatternDetailFragmentDirections.actionPatternDetailToEditPattern(args.patternId)
+                findNavController().navigate(action)
                 true
             }
             R.id.action_clone -> {
