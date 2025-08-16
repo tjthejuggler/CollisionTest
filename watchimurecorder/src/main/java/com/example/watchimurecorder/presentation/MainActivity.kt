@@ -38,6 +38,7 @@ import com.example.watchimurecorder.presentation.theme.JugglingTrackerTheme
 import com.example.watchimurecorder.services.HttpServerService
 import com.example.watchimurecorder.services.IMUDataService
 import kotlinx.coroutines.launch
+import kotlin.system.exitProcess
 
 class MainActivity : ComponentActivity() {
 
@@ -84,7 +85,13 @@ class MainActivity : ComponentActivity() {
         setTheme(android.R.style.Theme_DeviceDefault)
         
         setContent {
-            WearApp()
+            SwipeToRevealMenu(
+                onShutdown = {
+                    shutdownApp()
+                }
+            ) {
+                WearApp()
+            }
         }
 
         checkPermissionsAndStart()
@@ -636,6 +643,52 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                 }
+            }
+        }
+    }
+
+    private fun shutdownApp() {
+        Log.d(TAG, "Shutdown requested")
+        
+        lifecycleScope.launch {
+            try {
+                // Stop recording if active
+                imuDataService?.let { service ->
+                    if (service.recordingState.value == RecordingState.RECORDING) {
+                        Log.d(TAG, "Stopping recording before shutdown")
+                        service.stopRecording()
+                        kotlinx.coroutines.delay(1000) // Wait for recording to stop
+                    }
+                }
+                
+                // Stop HTTP server
+                httpServerService?.let { service ->
+                    if (service.serverStatus.value.isRunning) {
+                        Log.d(TAG, "Stopping HTTP server before shutdown")
+                        service.stopServer()
+                        kotlinx.coroutines.delay(500) // Wait for server to stop
+                    }
+                }
+                
+                // Unbind services
+                httpServiceConnection?.let { unbindService(it) }
+                imuServiceConnection?.let { unbindService(it) }
+                
+                // Stop services
+                stopService(Intent(this@MainActivity, HttpServerService::class.java))
+                stopService(Intent(this@MainActivity, IMUDataService::class.java))
+                
+                Log.d(TAG, "Services stopped, finishing activity")
+                
+                // Finish activity and exit
+                finish()
+                exitProcess(0)
+                
+            } catch (e: Exception) {
+                Log.e(TAG, "Error during shutdown", e)
+                // Force exit even if there's an error
+                finish()
+                exitProcess(0)
             }
         }
     }

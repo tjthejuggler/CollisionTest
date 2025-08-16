@@ -1,6 +1,6 @@
 # Juggling Progress Tracker
 
-*Last updated: 2025-08-16T06:32:00Z*
+*Last updated: 2025-08-16T10:59:00Z*
 
 ## Overview
 
@@ -585,6 +585,8 @@ The project includes a separate Wear OS module (`watchimurecorder/`) that implem
 - **Real-time Status**: Live display of recording state and sample counts
 - **Manual Controls**: Direct start/stop controls on the watch
 - **Server Information**: Shows IP address and connection status
+- **Side Swipe Menu**: Swipe from left edge to reveal shutdown menu
+- **Shutdown Functionality**: Safe app shutdown with service cleanup
 
 ### Technical Architecture
 
@@ -866,3 +868,95 @@ This fix resolves the core issue preventing successful IMU data synchronization 
 **Build Verification**: The watch module now compiles successfully with `./gradlew :watchimurecorder:assemble` completing without errors.
 
 The watch app is now ready for installation and testing with the new `/data` endpoint functionality.
+
+## Wear OS Side Swipe Menu Implementation
+
+### Overview
+*Added on 2025-08-16T10:59:00Z*
+
+A side swipe menu with shutdown functionality has been implemented for the Wear OS app to provide easy access to app shutdown without using hardware buttons.
+
+### Features
+
+#### Side Swipe Gesture
+- **Swipe from Left Edge**: Swipe right from the left edge of the screen to reveal the menu
+- **Smooth Animation**: Animated menu appearance with content sliding effect
+- **Touch Outside to Close**: Tap anywhere outside the menu to close it
+- **Visual Feedback**: Semi-transparent overlay indicates menu state
+
+#### Shutdown Functionality
+- **Safe Shutdown**: Properly stops all services before app termination
+- **Service Cleanup**: Stops IMU data recording and HTTP server gracefully
+- **Progress Indication**: Shows shutdown process with appropriate delays
+- **Force Exit**: Uses `exitProcess(0)` to ensure complete app termination
+
+### Technical Implementation
+
+#### Components Created
+- **`SwipeToRevealMenu.kt`**: Composable component implementing the swipe gesture and menu UI
+- **`ic_power_off.xml`**: Power button icon drawable resource for the shutdown button
+- **Shutdown Method**: Added `shutdownApp()` method to MainActivity for safe app termination
+
+#### UI Design
+- **Menu Width**: 80dp wide menu panel on the left side
+- **Dark Background**: Semi-transparent black background (90% opacity)
+- **Red Shutdown Button**: Circular red button with power icon
+- **Material Design**: Follows Wear OS design guidelines with proper spacing
+
+#### Gesture Handling
+- **Drag Detection**: Uses `detectDragGestures` to handle swipe interactions
+- **Threshold-based**: Menu stays open if swipe exceeds 20% of screen width
+- **Smooth Transitions**: Animated content offset and menu visibility
+- **Touch Boundaries**: Prevents accidental activation with proper gesture thresholds
+
+### Integration
+
+#### MainActivity Changes
+- **SwipeToRevealMenu Wrapper**: Main UI content wrapped in SwipeToRevealMenu component
+- **Shutdown Callback**: Integrated shutdown functionality with service cleanup
+- **Import Updates**: Added necessary imports for system exit functionality
+
+#### Service Management
+The shutdown process includes:
+1. **Stop Active Recording**: Halts IMU data collection if in progress
+2. **Stop HTTP Server**: Gracefully shuts down the network server
+3. **Unbind Services**: Properly disconnects from bound services
+4. **Stop Services**: Terminates foreground services
+5. **Exit Application**: Forces complete app termination
+
+### User Experience
+
+#### Usage Instructions
+1. **Access Menu**: Swipe right from the left edge of the watch screen
+2. **Shutdown App**: Tap the red power button in the revealed menu
+3. **Confirmation**: App will safely shut down all services and exit
+4. **Close Menu**: Tap outside the menu area to close without action
+
+#### Visual Feedback
+- **Menu Animation**: Smooth slide-in animation when menu appears
+- **Content Offset**: Main content slides right to reveal menu underneath
+- **Button States**: Clear visual indication of interactive elements
+- **Progress Display**: Shutdown process provides appropriate user feedback
+
+### Files Created/Modified
+
+#### New Files
+- `watchimurecorder/src/main/java/com/example/watchimurecorder/presentation/SwipeToRevealMenu.kt`
+- `watchimurecorder/src/main/res/drawable/ic_power_off.xml`
+
+#### Modified Files
+- `watchimurecorder/src/main/java/com/example/watchimurecorder/presentation/MainActivity.kt`: Added SwipeToRevealMenu integration and shutdown functionality
+
+### Build and Testing
+
+#### Compilation Status
+- **Build Successful**: All components compile without errors
+- **Gradle Build**: `./gradlew :watchimurecorder:build` completes successfully
+- **Resource Validation**: Drawable resources properly configured for Wear OS
+
+#### Testing Verification
+- **Gesture Recognition**: Swipe gestures properly detected and handled
+- **Menu Animation**: Smooth transitions and visual feedback working correctly
+- **Shutdown Process**: Safe service termination and app exit functionality verified
+
+This implementation provides users with an intuitive way to safely shut down the watch app without relying on hardware buttons or system navigation, ensuring proper cleanup of all background services and data recording processes.
