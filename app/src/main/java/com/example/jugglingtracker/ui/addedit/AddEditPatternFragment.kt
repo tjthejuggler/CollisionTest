@@ -208,6 +208,11 @@ class AddEditPatternFragment : Fragment() {
             showTrimVideoDialog()
         }
         
+        // Video delete button
+        binding.btnDeleteVideo.setOnClickListener {
+            showDeleteVideoDialog()
+        }
+        
         // Video thumbnail click
         binding.ivVideoThumbnail.setOnClickListener {
             // Preview video if available
@@ -317,7 +322,9 @@ class AddEditPatternFragment : Fragment() {
                 launch {
                     viewModel.videoFile.collect { videoFile ->
                         updateVideoThumbnail(videoFile)
-                        binding.btnTrimVideo.isEnabled = videoFile != null
+                        val hasVideo = videoFile != null
+                        binding.btnTrimVideo.isEnabled = hasVideo
+                        binding.btnDeleteVideo.isEnabled = hasVideo
                     }
                 }
                 
@@ -421,19 +428,20 @@ class AddEditPatternFragment : Fragment() {
             .inflate(R.layout.dialog_video_recording, null)
         
         val previewView = dialogView.findViewById<PreviewView>(R.id.preview_view)
+        val recordingIndicator = dialogView.findViewById<android.widget.ImageView>(R.id.iv_recording_indicator)
+        val recordingStatus = dialogView.findViewById<android.widget.TextView>(R.id.tv_recording_status)
+        val recordingDuration = dialogView.findViewById<android.widget.TextView>(R.id.tv_recording_duration)
+        val switchCameraButton = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btn_switch_camera)
+        val toggleFlashButton = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btn_toggle_flash)
+        val recordButton = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btn_record)
         
         val dialog = MaterialAlertDialogBuilder(requireContext())
             .setTitle("Record Video")
             .setView(dialogView)
-            .setPositiveButton("Start Recording") { _, _ ->
-                // Will be replaced with actual recording logic
-            }
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton("Close", null)
             .create()
         
         dialog.setOnShowListener {
-            val positiveButton = dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE)
-            
             // Initialize CameraX recorder
             cameraXVideoRecorder = CameraXVideoRecorder(
                 requireContext(),
@@ -441,21 +449,36 @@ class AddEditPatternFragment : Fragment() {
                 previewView
             )
             
+            // Setup camera switch button
+            switchCameraButton?.setOnClickListener {
+                cameraXVideoRecorder?.switchCamera()
+                updateFlashButtonVisibility(toggleFlashButton)
+            }
+            
+            // Setup flash toggle button
+            toggleFlashButton?.setOnClickListener {
+                cameraXVideoRecorder?.toggleFlash()
+            }
+            
+            // Setup record button
+            recordButton?.setOnClickListener {
+                if (!isRecording) {
+                    val videoFile = videoManager?.createVideoFile()
+                    if (videoFile != null) {
+                        startActualRecording(videoFile, recordButton, dialog, recordingIndicator, recordingStatus, recordingDuration)
+                    }
+                } else {
+                    stopActualRecording(recordButton, dialog, recordingIndicator, recordingStatus, recordingDuration)
+                }
+            }
+            
             lifecycleScope.launch {
                 val initResult = cameraXVideoRecorder?.initializeCamera()
                 if (initResult?.isSuccess == true) {
-                    positiveButton.setOnClickListener {
-                        if (!isRecording) {
-                            val videoFile = videoManager?.createVideoFile()
-                            if (videoFile != null) {
-                                startActualRecording(videoFile, positiveButton, dialog)
-                            }
-                        } else {
-                            stopActualRecording(positiveButton, dialog)
-                        }
-                    }
+                    updateFlashButtonVisibility(toggleFlashButton)
+                    recordButton?.isEnabled = true
                 } else {
-                    positiveButton.isEnabled = false
+                    recordButton?.isEnabled = false
                     Snackbar.make(binding.root, "Failed to initialize camera", Snackbar.LENGTH_LONG).show()
                 }
             }
@@ -464,12 +487,29 @@ class AddEditPatternFragment : Fragment() {
         dialog.show()
     }
     
-    private fun startActualRecording(videoFile: java.io.File, button: android.widget.Button, dialog: androidx.appcompat.app.AlertDialog) {
+    private fun updateFlashButtonVisibility(toggleFlashButton: com.google.android.material.button.MaterialButton?) {
+        toggleFlashButton?.visibility = if (cameraXVideoRecorder?.hasFlash() == true) {
+            android.view.View.VISIBLE
+        } else {
+            android.view.View.GONE
+        }
+    }
+    
+    private fun startActualRecording(
+        videoFile: java.io.File,
+        button: com.google.android.material.button.MaterialButton?,
+        dialog: androidx.appcompat.app.AlertDialog,
+        recordingIndicator: android.widget.ImageView?,
+        recordingStatus: android.widget.TextView?,
+        recordingDuration: android.widget.TextView?
+    ) {
         cameraXVideoRecorder?.startRecording(videoFile, object : CameraXVideoRecorder.RecordingListener {
             override fun onRecordingStarted() {
                 isRecording = true
-                button.text = "Stop Recording"
-                button.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.error))
+                button?.setIconResource(R.drawable.ic_pause)
+                button?.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.error)
+                recordingIndicator?.visibility = android.view.View.VISIBLE
+                recordingStatus?.text = "Recording..."
             }
             
             override fun onRecordingFinished(videoFile: java.io.File) {
@@ -481,21 +521,36 @@ class AddEditPatternFragment : Fragment() {
             
             override fun onRecordingError(error: String) {
                 isRecording = false
-                button.text = "Start Recording"
-                button.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.primary))
+                button?.setIconResource(R.drawable.ic_camera)
+                button?.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.error)
+                recordingIndicator?.visibility = android.view.View.GONE
+                recordingStatus?.text = "Ready to record"
+                recordingDuration?.text = "00:00"
                 Snackbar.make(binding.root, "Recording error: $error", Snackbar.LENGTH_LONG).show()
             }
             
             override fun onRecordingProgress(durationMs: Long) {
-                // Update recording duration display if needed
+                // Update recording duration display
+                val seconds = (durationMs / 1000) % 60
+                val minutes = (durationMs / (1000 * 60)) % 60
+                val formattedTime = String.format("%02d:%02d", minutes, seconds)
+                recordingDuration?.text = formattedTime
             }
         })
     }
     
-    private fun stopActualRecording(button: android.widget.Button, dialog: androidx.appcompat.app.AlertDialog) {
+    private fun stopActualRecording(
+        button: com.google.android.material.button.MaterialButton?,
+        dialog: androidx.appcompat.app.AlertDialog,
+        recordingIndicator: android.widget.ImageView?,
+        recordingStatus: android.widget.TextView?,
+        recordingDuration: android.widget.TextView?
+    ) {
         cameraXVideoRecorder?.stopRecording()
-        button.text = "Start Recording"
-        button.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.primary))
+        button?.setIconResource(R.drawable.ic_camera)
+        button?.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.error)
+        recordingIndicator?.visibility = android.view.View.GONE
+        recordingStatus?.text = "Ready to record"
     }
     
     private fun stopVideoRecording() {
@@ -513,6 +568,22 @@ class AddEditPatternFragment : Fragment() {
     private fun showTrimVideoDialog() {
         // TODO: Implement video trimming dialog
         Snackbar.make(binding.root, "Video trimming coming soon!", Snackbar.LENGTH_SHORT).show()
+    }
+    
+    private fun showDeleteVideoDialog() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Delete Video")
+            .setMessage("Are you sure you want to delete this video? This action cannot be undone.")
+            .setPositiveButton("Delete") { _, _ ->
+                deleteCurrentVideo()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+    
+    private fun deleteCurrentVideo() {
+        viewModel.deleteVideo()
+        Snackbar.make(binding.root, "Video deleted successfully", Snackbar.LENGTH_SHORT).show()
     }
     
     private fun previewVideo(videoFile: java.io.File) {

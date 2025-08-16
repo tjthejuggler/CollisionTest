@@ -7,27 +7,9 @@
     android:background="@color/background"
     tools:context=".ui.patterns.AddEditPatternFragment">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/app_bar_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
-
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@color/primary"
-            app:titleTextColor="@color/on_primary"
-            app:navigationIcon="@drawable/ic_arrow_back"
-            tools:title="@string/title_pattern_add" />
-
-    </com.google.android.material.appbar.AppBarLayout>
-
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        android:layout_height="match_parent">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -316,7 +298,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:layout_marginEnd="4dp"
+                            android:layout_marginEnd="2dp"
                             android:text="@string/button_record_video"
                             app:icon="@drawable/ic_camera"
                             app:strokeColor="@color/primary" />
@@ -327,8 +309,8 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:layout_marginStart="4dp"
-                            android:layout_marginEnd="4dp"
+                            android:layout_marginStart="2dp"
+                            android:layout_marginEnd="2dp"
                             android:text="@string/button_import_video"
                             app:icon="@drawable/ic_folder"
                             app:strokeColor="@color/primary" />
@@ -339,10 +321,25 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:layout_marginStart="4dp"
+                            android:layout_marginStart="2dp"
+                            android:layout_marginEnd="2dp"
                             android:text="@string/button_trim_video"
                             app:icon="@drawable/ic_cut"
                             app:strokeColor="@color/secondary"
+                            android:enabled="false" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_delete_video"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="2dp"
+                            android:text="Delete"
+                            app:icon="@drawable/ic_delete"
+                            app:strokeColor="@color/error"
+                            app:iconTint="@color/error"
+                            android:textColor="@color/error"
                             android:enabled="false" />
 
                     </LinearLayout>

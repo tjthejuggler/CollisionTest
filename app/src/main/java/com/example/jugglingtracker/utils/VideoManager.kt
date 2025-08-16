@@ -284,13 +284,32 @@ class VideoManager(private val context: Context) {
         if (uriString.isNullOrBlank()) return null
         
         return try {
+            android.util.Log.d("VideoManager", "Parsing URI: $uriString")
+            
             val uri = Uri.parse(uriString)
-            if (uri.scheme == "file") {
-                File(uri.path ?: return null)
-            } else {
-                null
+            when (uri.scheme) {
+                "file" -> {
+                    val path = uri.path
+                    android.util.Log.d("VideoManager", "File path: $path")
+                    if (path != null) {
+                        val file = File(path)
+                        android.util.Log.d("VideoManager", "File exists: ${file.exists()}, size: ${file.length()}")
+                        file
+                    } else null
+                }
+                null -> {
+                    // Handle case where URI might be just a file path
+                    val file = File(uriString)
+                    android.util.Log.d("VideoManager", "Direct file path: ${file.absolutePath}, exists: ${file.exists()}")
+                    file
+                }
+                else -> {
+                    android.util.Log.w("VideoManager", "Unsupported URI scheme: ${uri.scheme}")
+                    null
+                }
             }
         } catch (e: Exception) {
+            android.util.Log.e("VideoManager", "Error parsing URI: $uriString", e)
             null
         }
     }

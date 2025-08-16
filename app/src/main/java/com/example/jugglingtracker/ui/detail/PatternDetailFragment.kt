@@ -140,33 +140,7 @@ class PatternDetailFragment : Fragment() {
         seekBar = binding.seekBar
         durationText = binding.tvVideoDuration
         
-        // Setup video view listeners
-        videoView?.setOnPreparedListener { mediaPlayer ->
-            isVideoLoaded = true
-            viewModel.setVideoLoading(false)
-            
-            val duration = mediaPlayer.duration
-            seekBar?.max = duration
-            durationText?.text = formatDuration(duration.toLong())
-            
-            // Setup progress tracking
-            startProgressTracking()
-            
-            mediaPlayer.setOnVideoSizeChangedListener { _, width, height ->
-                // Adjust video view aspect ratio if needed
-            }
-        }
-        
-        videoView?.setOnErrorListener { _, what, extra ->
-            viewModel.setVideoError("Video playback error: $what, $extra")
-            true
-        }
-        
-        videoView?.setOnCompletionListener {
-            viewModel.stopVideo()
-            playPauseButton?.setIconResource(R.drawable.ic_play)
-            stopProgressTracking()
-        }
+        // Video view listeners will be set up in loadVideo method
         
         // Setup seek bar listener
         seekBar?.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -284,10 +258,27 @@ class PatternDetailFragment : Fragment() {
                     }
                 }
                 
-                // Load video when URI is available
+                // Load video when file is available
                 launch {
-                    viewModel.getVideoUri()?.let { uri ->
-                        loadVideo(uri)
+                    viewModel.videoFile.collect { videoFile ->
+                        if (videoFile != null && videoFile.exists()) {
+                            // Use FileProvider URI for better compatibility
+                            try {
+                                val uri = androidx.core.content.FileProvider.getUriForFile(
+                                    requireContext(),
+                                    "${requireContext().packageName}.fileprovider",
+                                    videoFile
+                                )
+                                loadVideo(uri)
+                            } catch (e: Exception) {
+                                // Fallback to file URI
+                                val uri = android.net.Uri.fromFile(videoFile)
+                                loadVideo(uri)
+                            }
+                        } else {
+                            // Hide video player if no video
+                            binding.videoPlayer.visibility = View.GONE
+                        }
                     }
                 }
             }
@@ -404,9 +395,85 @@ class PatternDetailFragment : Fragment() {
     }
 
     private fun loadVideo(uri: Uri) {
+        android.util.Log.d("PatternDetail", "Loading video from URI: $uri")
         viewModel.setVideoLoading(true)
-        videoView?.setVideoURI(uri)
+        
+        // Clear any previous video and reset the VideoView
+        videoView?.stopPlayback()
+        videoView?.suspend()
+        videoView?.resume()
+        
+        // Ensure VideoView is visible and properly sized
         binding.videoPlayer.visibility = View.VISIBLE
+        
+        // Force a layout pass to ensure the VideoView surface is ready
+        binding.videoPlayer.post {
+            android.util.Log.d("PatternDetail", "VideoView dimensions: ${binding.videoPlayer.width}x${binding.videoPlayer.height}")
+            
+            // Set the video URI after the view is laid out
+            videoView?.setVideoURI(uri)
+            
+            // Prepare the video asynchronously
+            videoView?.setOnPreparedListener { mediaPlayer ->
+                android.util.Log.d("PatternDetail", "Video prepared successfully")
+                isVideoLoaded = true
+                viewModel.setVideoLoading(false)
+                
+                val duration = mediaPlayer.duration
+                seekBar?.max = duration
+                durationText?.text = formatDuration(duration.toLong())
+                
+                // Enable looping
+                mediaPlayer.isLooping = true
+                
+                // Force the video to start playing to ensure surface is active
+                mediaPlayer.start()
+                viewModel.playVideo()
+                playPauseButton?.setIconResource(R.drawable.ic_pause)
+                
+                // Setup progress tracking
+                startProgressTracking()
+                
+                mediaPlayer.setOnVideoSizeChangedListener { _, width, height ->
+                    android.util.Log.d("PatternDetail", "Video size: ${width}x${height}")
+                    // Keep the VideoView at its original size to avoid surface issues
+                    // The video will be scaled within the view automatically
+                }
+            }
+            
+            videoView?.setOnErrorListener { _, what, extra ->
+                android.util.Log.e("PatternDetail", "Video error: what=$what, extra=$extra")
+                viewModel.setVideoError("Video playback error: $what, $extra")
+                isVideoLoaded = false
+                true
+            }
+            
+            videoView?.setOnCompletionListener {
+                android.util.Log.d("PatternDetail", "Video completed")
+                // Since we enabled looping, this shouldn't be called unless looping fails
+                // Reset to beginning and continue playing
+                videoView?.seekTo(0)
+                if (viewModel.videoPlaybackState.value.isPlaying) {
+                    videoView?.start()
+                }
+            }
+            
+            videoView?.setOnInfoListener { _, what, extra ->
+                android.util.Log.d("PatternDetail", "Video info: what=$what, extra=$extra")
+                when (what) {
+                    android.media.MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START -> {
+                        android.util.Log.d("PatternDetail", "Video rendering started")
+                    }
+                    android.media.MediaPlayer.MEDIA_INFO_BUFFERING_START -> {
+                        android.util.Log.d("PatternDetail", "Buffering started")
+                    }
+                    android.media.MediaPlayer.MEDIA_INFO_BUFFERING_END -> {
+                        android.util.Log.d("PatternDetail", "Buffering ended")
+                    }
+                }
+                false
+            }
+        }
     }
 
     private fun playVideo() {

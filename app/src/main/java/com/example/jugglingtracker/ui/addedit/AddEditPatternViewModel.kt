@@ -149,6 +149,9 @@ class AddEditPatternViewModel(
         _selectedDependents.value = patternEntity.dependents.toSet()
         _selectedRelatedPatterns.value = patternEntity.relatedPatterns.toSet()
         
+        // Load video file information if video URI exists
+        updateVideoFileInfo(patternEntity.pattern.videoUri)
+        
         _uiState.value = _uiState.value.copy(
             isLoading = false,
             isEditMode = true
@@ -207,6 +210,31 @@ class AddEditPatternViewModel(
                     if (durationResult.isSuccess) {
                         _videoDuration.value = durationResult.getOrNull() ?: 0L
                     }
+                    
+                    // Generate thumbnail if it doesn't exist
+                    val thumbnailResult = videoManager.generateThumbnail(file)
+                    if (thumbnailResult.isSuccess) {
+                        _thumbnailFile.value = thumbnailResult.getOrNull()
+                    }
+                } else {
+                    // Try to handle URI directly if file doesn't exist at expected location
+                    try {
+                        val videoUri = Uri.parse(uri)
+                        
+                        // Get video duration from URI
+                        val durationResult = videoManager.getVideoDuration(videoUri)
+                        if (durationResult.isSuccess) {
+                            _videoDuration.value = durationResult.getOrNull() ?: 0L
+                        }
+                        
+                        // Generate thumbnail from URI
+                        val thumbnailResult = videoManager.generateThumbnail(videoUri)
+                        if (thumbnailResult.isSuccess) {
+                            _thumbnailFile.value = thumbnailResult.getOrNull()
+                        }
+                    } catch (e: Exception) {
+                        android.util.Log.e("AddEditPatternVM", "Error processing video URI: $uri", e)
+                    }
                 }
             }
         }
@@ -218,8 +246,12 @@ class AddEditPatternViewModel(
     fun setVideoFromRecording(videoFile: File) {
         viewModelScope.launch {
             _videoFile.value = videoFile
-            _videoUri.value = videoFile.toURI().toString()
+            // Store as file:// URI for better compatibility
+            _videoUri.value = "file://${videoFile.absolutePath}"
             _videoFileSize.value = videoManager.getVideoFileSize(videoFile)
+            
+            android.util.Log.d("AddEditPatternVM", "Video recorded: ${videoFile.absolutePath}")
+            android.util.Log.d("AddEditPatternVM", "Video URI: ${_videoUri.value}")
             
             // Generate thumbnail
             val thumbnailResult = videoManager.generateThumbnail(videoFile)
@@ -247,7 +279,8 @@ class AddEditPatternViewModel(
             if (copyResult.isSuccess) {
                 val videoFile = copyResult.getOrNull()!!
                 _videoFile.value = videoFile
-                _videoUri.value = videoFile.toURI().toString()
+                // Store as file:// URI for better compatibility
+                _videoUri.value = "file://${videoFile.absolutePath}"
                 _videoFileSize.value = videoManager.getVideoFileSize(videoFile)
                 
                 // Generate thumbnail
@@ -280,16 +313,32 @@ class AddEditPatternViewModel(
             val videoFile = _videoFile.value
             val thumbnailFile = _thumbnailFile.value
             
+            // Delete physical files if they exist
             if (videoFile != null) {
-                videoManager.deleteVideo(videoFile, thumbnailFile)
+                val deleteResult = videoManager.deleteVideo(videoFile, thumbnailFile)
+                if (deleteResult.isFailure) {
+                    android.util.Log.w("AddEditPatternVM", "Failed to delete video files: ${deleteResult.exceptionOrNull()?.message}")
+                }
             }
             
+            // Clear all video-related state
             _videoFile.value = null
             _videoUri.value = null
             _thumbnailFile.value = null
             _videoDuration.value = 0L
             _videoFileSize.value = 0L
+            
+            // If we're editing an existing pattern, we should update the pattern in the database
+            // to remove the video URI. This will be handled when the user saves the pattern.
+            android.util.Log.d("AddEditPatternVM", "Video removed successfully")
         }
+    }
+
+    /**
+     * Delete current video (alias for removeVideo for UI consistency)
+     */
+    fun deleteVideo() {
+        removeVideo()
     }
 
     /**

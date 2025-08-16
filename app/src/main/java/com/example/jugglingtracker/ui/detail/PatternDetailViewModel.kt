@@ -94,7 +94,10 @@ class PatternDetailViewModel(
     val videoFile: StateFlow<File?> = patternEntity
         .map { entity ->
             entity?.pattern?.videoUri?.let { uri ->
-                videoManager.getVideoFileFromUri(uri)
+                android.util.Log.d("PatternDetailVM", "Getting video file from URI: $uri")
+                val file = videoManager.getVideoFileFromUri(uri)
+                android.util.Log.d("PatternDetailVM", "Video file: ${file?.absolutePath}, exists: ${file?.exists()}")
+                file
             }
         }
         .stateIn(

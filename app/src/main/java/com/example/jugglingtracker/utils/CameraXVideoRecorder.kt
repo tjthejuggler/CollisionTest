@@ -40,6 +40,7 @@ class CameraXVideoRecorder(
     
     private var isRecording = false
     private var recordingListener: RecordingListener? = null
+    private var currentCameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
 
     interface RecordingListener {
         fun onRecordingStarted()
@@ -91,9 +92,6 @@ class CameraXVideoRecorder(
         
         videoCapture = VideoCapture.withOutput(recorder)
 
-        // Select back camera as default
-        val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-
         try {
             // Unbind use cases before rebinding
             cameraProvider.unbindAll()
@@ -101,7 +99,7 @@ class CameraXVideoRecorder(
             // Bind use cases to camera
             camera = cameraProvider.bindToLifecycle(
                 lifecycleOwner,
-                cameraSelector,
+                currentCameraSelector,
                 preview,
                 videoCapture
             )
@@ -189,8 +187,29 @@ class CameraXVideoRecorder(
      * Switch between front and back camera
      */
     fun switchCamera() {
-        // Implementation for camera switching if needed
-        // This would require rebinding with different camera selector
+        if (isRecording) {
+            Log.w(TAG, "Cannot switch camera while recording")
+            return
+        }
+        
+        currentCameraSelector = if (currentCameraSelector == CameraSelector.DEFAULT_BACK_CAMERA) {
+            CameraSelector.DEFAULT_FRONT_CAMERA
+        } else {
+            CameraSelector.DEFAULT_BACK_CAMERA
+        }
+        
+        // Rebind camera with new selector
+        try {
+            bindCameraUseCases()
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to switch camera", e)
+            // Revert to previous camera selector
+            currentCameraSelector = if (currentCameraSelector == CameraSelector.DEFAULT_BACK_CAMERA) {
+                CameraSelector.DEFAULT_FRONT_CAMERA
+            } else {
+                CameraSelector.DEFAULT_BACK_CAMERA
+            }
+        }
     }
 
     /**
@@ -224,6 +243,13 @@ class CameraXVideoRecorder(
      */
     fun hasFlash(): Boolean {
         return camera?.cameraInfo?.hasFlashUnit() == true
+    }
+    
+    /**
+     * Check if front camera is currently selected
+     */
+    fun isFrontCamera(): Boolean {
+        return currentCameraSelector == CameraSelector.DEFAULT_FRONT_CAMERA
     }
 
     /**
