@@ -6,6 +6,7 @@ import android.os.CountDownTimer
 import android.view.View
 import androidx.fragment.app.DialogFragment
 import com.example.jugglingtracker.R
+import com.example.jugglingtracker.data.entities.TestSession
 import com.example.jugglingtracker.databinding.DialogAddTestSessionBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
@@ -20,6 +21,8 @@ class TakeTestDialogFragment : DialogFragment() {
     private val binding get() = _binding!!
 
     private var onTestSessionCreated: ((Int, Int, Int, String?) -> Unit)? = null
+    private var onTestSessionUpdated: ((TestSession) -> Unit)? = null
+    private var existingTestSession: TestSession? = null
     
     // Timer related variables
     private var countdownTimer: CountDownTimer? = null
@@ -41,6 +44,20 @@ class TakeTestDialogFragment : DialogFragment() {
                 }
             }
         }
+        
+        fun newInstanceForEdit(
+            patternName: String,
+            testSession: TestSession,
+            onTestSessionUpdated: (TestSession) -> Unit
+        ): TakeTestDialogFragment {
+            return TakeTestDialogFragment().apply {
+                this.onTestSessionUpdated = onTestSessionUpdated
+                this.existingTestSession = testSession
+                arguments = Bundle().apply {
+                    putString("pattern_name", patternName)
+                }
+            }
+        }
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -51,18 +68,40 @@ class TakeTestDialogFragment : DialogFragment() {
         setupUI()
         setupButtons()
         
+        val isEditing = existingTestSession != null
+        val title = if (isEditing) "Edit Test Session - $patternName" else "Test Session - $patternName"
+        val positiveButtonText = if (isEditing) "Update Test" else "Submit Test"
+        
         return MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Record Test Session for $patternName")
+            .setTitle(title)
             .setView(binding.root)
+            .setPositiveButton(positiveButtonText) { _, _ ->
+                saveTestSession()
+            }
+            .setNegativeButton("Cancel") { _, _ ->
+                stopAllTimers()
+                dismiss()
+            }
+            .setCancelable(true)
             .create()
     }
 
     private fun setupUI() {
-        // Set default test length to short (first chip)
-        binding.chipShortTest.isChecked = true
+        val existingSession = existingTestSession
         
-        // Set initial focus on success count
-        binding.etSuccessCount.requestFocus()
+        if (existingSession != null) {
+            // Populate fields with existing data
+            populateFieldsFromTestSession(existingSession)
+        } else {
+            // Set default test length to short (first chip)
+            binding.chipShortTest.isChecked = true
+            
+            // Set default values
+            binding.etDropsCount.setText("0")
+            
+            // Set initial focus on success count
+            binding.etSuccessCount.requestFocus()
+        }
         
         // Set up chip group listener to update max test duration
         binding.chipGroupTestLength.setOnCheckedStateChangeListener { group, checkedIds ->
@@ -75,34 +114,58 @@ class TakeTestDialogFragment : DialogFragment() {
         // Setup timer controls
         setupTimerControls()
     }
+    
+    private fun populateFieldsFromTestSession(testSession: TestSession) {
+        // Set success count
+        binding.etSuccessCount.setText(testSession.successCount.toString())
+        
+        // Set drops count (attemptCount - successCount)
+        val dropsCount = testSession.attemptCount - testSession.successCount
+        binding.etDropsCount.setText(dropsCount.toString())
+        
+        // Set notes
+        binding.etNotes.setText(testSession.notes ?: "")
+        
+        // Set test length based on duration
+        val durationMinutes = testSession.duration / (1000 * 60)
+        when {
+            durationMinutes <= 5 -> binding.chipShortTest.isChecked = true
+            durationMinutes <= 15 -> binding.chipMediumTest.isChecked = true
+            else -> binding.chipLongTest.isChecked = true
+        }
+        
+        // Set timer display to show the original duration
+        elapsedTimeSeconds = (testSession.duration / 1000).toInt()
+        updateTimerDisplay()
+        binding.tvCountdownDisplay.text = "Original session time"
+    }
 
     private fun setupButtons() {
-        binding.btnCancel.setOnClickListener {
-            stopAllTimers()
-            dismiss()
-        }
-
-        binding.btnSave.setOnClickListener {
-            saveTestSession()
-        }
+        // Buttons are now handled by the MaterialAlertDialogBuilder
+        // No setup needed for layout buttons since they're hidden
     }
     
     private fun setupTimerControls() {
-        binding.btnStartTimer.setOnClickListener {
-            startCountdown()
+        // Ensure timer button is visible and enabled
+        binding.btnTimerToggle.visibility = View.VISIBLE
+        binding.btnTimerToggle.isEnabled = true
+        
+        binding.btnTimerToggle.setOnClickListener {
+            if (isTimerRunning) {
+                stopTimer()
+            } else {
+                // Always reset to 0 when starting
+                elapsedTimeSeconds = 0
+                updateTimerDisplay()
+                startCountdown()
+            }
         }
         
-        binding.btnStopTimer.setOnClickListener {
-            stopTimer()
-        }
-        
-        binding.btnCancelTimer.setOnClickListener {
-            cancelTimer()
-        }
-        
-        binding.btnResetTimer.setOnClickListener {
-            resetTimer()
-        }
+        // Set up hidden buttons for compatibility
+        binding.btnStartTimer.setOnClickListener { /* hidden */ }
+        binding.btnStopTimer.setOnClickListener { /* hidden */ }
+        binding.btnResetTimer.setOnClickListener { /* hidden */ }
+        binding.btnCancelTimer.setOnClickListener { /* hidden */ }
     }
 
     private fun updateMaxDurationFromChip() {
@@ -119,7 +182,7 @@ class TakeTestDialogFragment : DialogFragment() {
         if (isCountdownRunning || isTimerRunning) return
         
         isCountdownRunning = true
-        binding.btnStartTimer.isEnabled = false
+        binding.btnTimerToggle.isEnabled = false
         binding.tvCountdownDisplay.visibility = View.VISIBLE
         
         countdownTimer = object : CountDownTimer(5000, 1000) {
@@ -130,6 +193,7 @@ class TakeTestDialogFragment : DialogFragment() {
             
             override fun onFinish() {
                 isCountdownRunning = false
+                binding.btnTimerToggle.isEnabled = true
                 binding.tvCountdownDisplay.visibility = View.GONE
                 startTimer()
             }
@@ -141,9 +205,8 @@ class TakeTestDialogFragment : DialogFragment() {
         
         isTimerRunning = true
         elapsedTimeSeconds = 0
-        binding.btnStartTimer.isEnabled = false
-        binding.btnStopTimer.isEnabled = true
-        binding.btnCancelTimer.isEnabled = true
+        binding.btnTimerToggle.text = getString(R.string.button_stop_timer)
+        binding.btnTimerToggle.setIconResource(R.drawable.ic_pause)
         binding.tvCountdownDisplay.text = getString(R.string.timer_running)
         binding.tvCountdownDisplay.visibility = View.VISIBLE
         
@@ -164,10 +227,8 @@ class TakeTestDialogFragment : DialogFragment() {
     private fun stopTimer() {
         testTimer?.cancel()
         isTimerRunning = false
-        binding.btnStartTimer.isEnabled = true
-        binding.btnStopTimer.isEnabled = false
-        binding.btnCancelTimer.isEnabled = false
-        binding.btnResetTimer.visibility = View.VISIBLE
+        binding.btnTimerToggle.text = getString(R.string.button_start_timer)
+        binding.btnTimerToggle.setIconResource(R.drawable.ic_play)
         binding.tvCountdownDisplay.text = getString(R.string.timer_stopped)
         updateTimerDisplay()
     }
@@ -175,10 +236,8 @@ class TakeTestDialogFragment : DialogFragment() {
     private fun cancelTimer() {
         stopAllTimers()
         elapsedTimeSeconds = 0
-        binding.btnStartTimer.isEnabled = true
-        binding.btnStopTimer.isEnabled = false
-        binding.btnCancelTimer.isEnabled = false
-        binding.btnResetTimer.visibility = View.GONE
+        binding.btnTimerToggle.text = getString(R.string.button_start_timer)
+        binding.btnTimerToggle.setIconResource(R.drawable.ic_play)
         binding.tvCountdownDisplay.text = getString(R.string.timer_ready)
         binding.tvCountdownDisplay.visibility = View.VISIBLE
         updateTimerDisplay()
@@ -186,10 +245,8 @@ class TakeTestDialogFragment : DialogFragment() {
     
     private fun resetTimer() {
         elapsedTimeSeconds = 0
-        binding.btnStartTimer.isEnabled = true
-        binding.btnStopTimer.isEnabled = false
-        binding.btnCancelTimer.isEnabled = false
-        binding.btnResetTimer.visibility = View.GONE
+        binding.btnTimerToggle.text = getString(R.string.button_start_timer)
+        binding.btnTimerToggle.setIconResource(R.drawable.ic_play)
         binding.tvCountdownDisplay.text = getString(R.string.timer_ready)
         binding.tvCountdownDisplay.visibility = View.VISIBLE
         updateTimerDisplay()

@@ -86,7 +86,8 @@
             android:layout_height="wrap_content"
             android:inputType="number"
             android:maxLines="1"
-            tools:text="2" />
+            android:text="0"
+            tools:text="0" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -114,24 +115,24 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="00:00"
-            android:textAppearance="@style/TextAppearance.Material3.DisplayMedium"
+            android:textAppearance="@style/TextAppearance.Material3.DisplaySmall"
             android:textColor="@color/text_primary"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="8dp"
             android:fontFamily="monospace" />
 
-        <!-- Countdown Display -->
+        <!-- Status Display -->
         <TextView
             android:id="@+id/tv_countdown_display"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="@string/timer_ready"
-            android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
+            android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
             android:textColor="@color/primary"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="12dp"
             android:visibility="visible" />
 
-        <!-- Timer Controls -->
+        <!-- Single Timer Control Button -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -139,46 +140,39 @@
             android:gravity="center">
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_start_timer"
-                style="@style/Widget.Material3.Button"
+                android:id="@+id/btn_timer_toggle"
+                style="@style/Widget.Material3.Button.TonalButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
                 android:text="@string/button_start_timer"
-                android:backgroundTint="@color/primary"
                 app:icon="@drawable/ic_play" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_stop_timer"
-                style="@style/Widget.Material3.Button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:text="@string/button_stop_timer"
-                android:backgroundTint="@color/primary"
-                android:enabled="false"
-                app:icon="@drawable/ic_pause" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_cancel_timer"
-                style="@style/Widget.Material3.Button.TextButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:text="@string/button_cancel_timer"
-                android:textColor="@color/text_secondary"
-                android:enabled="false" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_reset_timer"
-                style="@style/Widget.Material3.Button.TextButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/button_reset_timer"
-                android:textColor="@color/text_secondary"
-                android:visibility="gone" />
-
         </LinearLayout>
+
+        <!-- Hidden buttons for compatibility -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_start_timer"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_stop_timer"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_reset_timer"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_cancel_timer"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone" />
 
     </LinearLayout>
 
@@ -204,30 +198,17 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Dialog Buttons -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="end">
+    <!-- Hidden Dialog Buttons (using dialog's built-in buttons instead) -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_cancel"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_cancel"
-            style="@style/Widget.Material3.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:text="@string/button_cancel"
-            android:textColor="@color/text_secondary" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_save"
-            style="@style/Widget.Material3.Button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/button_save"
-            android:backgroundTint="@color/primary" />
-
-    </LinearLayout>
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_save"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone" />
 
 </LinearLayout>

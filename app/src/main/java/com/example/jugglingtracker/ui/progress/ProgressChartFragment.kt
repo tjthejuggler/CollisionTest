@@ -13,9 +13,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.jugglingtracker.JugglingTrackerApplication
 import com.example.jugglingtracker.R
+import com.example.jugglingtracker.data.entities.TestSession
 import com.example.jugglingtracker.databinding.FragmentProgressChartBinding
+import com.example.jugglingtracker.ui.adapters.EditableTestSessionAdapter
+import com.example.jugglingtracker.ui.dialogs.TakeTestDialogFragment
 import com.github.mikephil.charting.animation.Easing
 import com.github.mikephil.charting.components.Legend
 import com.github.mikephil.charting.components.XAxis
@@ -26,6 +30,8 @@ import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -60,6 +66,7 @@ class ProgressChartFragment : Fragment(), OnChartValueSelectedListener {
         
         setupChart()
         setupFilterControls()
+        setupTestSessionsSection()
         observeViewModel()
         
         // Load progress data for the specific pattern
@@ -173,6 +180,25 @@ class ProgressChartFragment : Fragment(), OnChartValueSelectedListener {
         }
     }
 
+    private fun setupTestSessionsSection() {
+        var isExpanded = false
+        
+        binding.layoutSessionsHeader.setOnClickListener {
+            isExpanded = !isExpanded
+            
+            if (isExpanded) {
+                binding.layoutSessionsContent.visibility = View.VISIBLE
+                binding.ivExpandSessions.rotation = 180f
+            } else {
+                binding.layoutSessionsContent.visibility = View.GONE
+                binding.ivExpandSessions.rotation = 0f
+            }
+        }
+        
+        // Setup RecyclerView for test sessions
+        binding.rvTestSessions.layoutManager = LinearLayoutManager(requireContext())
+    }
+
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -192,10 +218,17 @@ class ProgressChartFragment : Fragment(), OnChartValueSelectedListener {
                 
                 // Observe statistics
                 launch {
-                    viewModel.statistics.collect { stats ->
-                        updateStatistics(stats)
-                    }
-                }
+                     viewModel.statistics.collect { stats ->
+                         updateStatistics(stats)
+                     }
+                 }
+                 
+                 // Observe filtered test sessions for the list
+                 launch {
+                     viewModel.filteredTestSessions.collect { sessions ->
+                         updateTestSessionsList(sessions)
+                     }
+                 }
             }
         }
     }
@@ -282,30 +315,93 @@ class ProgressChartFragment : Fragment(), OnChartValueSelectedListener {
     private fun updateDetailedStatistics(sessions: List<com.example.jugglingtracker.data.entities.TestSession>) {
         // Calculate best results by test length
         val shortSessions = sessions.filter { it.duration <= 5 * 60 * 1000L }
-        val mediumSessions = sessions.filter { it.duration in (5 * 60 * 1000L)..(15 * 60 * 1000L) }
+        val mediumSessions = sessions.filter { it.duration > 5 * 60 * 1000L && it.duration <= 15 * 60 * 1000L }
         val longSessions = sessions.filter { it.duration > 15 * 60 * 1000L }
         
         // Best short test
         val bestShort = shortSessions.maxByOrNull { session ->
             if (session.attemptCount > 0) session.successCount.toDouble() / session.attemptCount.toDouble() else 0.0
         }
-        binding.tvBestShort.text = bestShort?.let { "${it.successCount}/${it.attemptCount}" } ?: "N/A"
+        binding.tvBestShort.text = bestShort?.let {
+            val drops = it.attemptCount - it.successCount
+            "${it.successCount}/${drops}"
+        } ?: "N/A"
         
         // Best medium test
         val bestMedium = mediumSessions.maxByOrNull { session ->
             if (session.attemptCount > 0) session.successCount.toDouble() / session.attemptCount.toDouble() else 0.0
         }
-        binding.tvBestMedium.text = bestMedium?.let { "${it.successCount}/${it.attemptCount}" } ?: "N/A"
+        binding.tvBestMedium.text = bestMedium?.let {
+            val drops = it.attemptCount - it.successCount
+            "${it.successCount}/${drops}"
+        } ?: "N/A"
         
         // Best long test
         val bestLong = longSessions.maxByOrNull { session ->
             if (session.attemptCount > 0) session.successCount.toDouble() / session.attemptCount.toDouble() else 0.0
         }
-        binding.tvBestLong.text = bestLong?.let { "${it.successCount}/${it.attemptCount}" } ?: "N/A"
+        binding.tvBestLong.text = bestLong?.let {
+            val drops = it.attemptCount - it.successCount
+            "${it.successCount}/${drops}"
+        } ?: "N/A"
         
         // Total attempts
         val totalAttempts = sessions.sumOf { it.attemptCount }
         binding.tvTotalAttempts.text = totalAttempts.toString()
+    }
+
+    private fun updateTestSessionsList(sessions: List<com.example.jugglingtracker.data.entities.TestSession>) {
+        // Update sessions count
+        binding.tvSessionsCount.text = "${sessions.size} sessions"
+        
+        if (sessions.isEmpty()) {
+            binding.rvTestSessions.visibility = View.GONE
+            binding.layoutNoSessions.visibility = View.VISIBLE
+        } else {
+            binding.rvTestSessions.visibility = View.VISIBLE
+            binding.layoutNoSessions.visibility = View.GONE
+            
+            // Setup adapter if not already set
+            if (binding.rvTestSessions.adapter == null) {
+                val adapter = EditableTestSessionAdapter(
+                    onEditClick = { testSession ->
+                        // Handle edit click - show edit dialog
+                        showEditTestSessionDialog(testSession)
+                    },
+                    onDeleteClick = { testSession ->
+                        // Handle delete click - show confirmation dialog
+                        showDeleteConfirmationDialog(testSession)
+                    }
+                )
+                binding.rvTestSessions.adapter = adapter
+            }
+            
+            // Update adapter data
+            (binding.rvTestSessions.adapter as EditableTestSessionAdapter).submitList(sessions.sortedByDescending { it.date })
+        }
+    }
+
+    private fun showEditTestSessionDialog(testSession: com.example.jugglingtracker.data.entities.TestSession) {
+        val dialog = TakeTestDialogFragment.newInstanceForEdit(
+            patternName = "Pattern", // TODO: Get actual pattern name from pattern ID
+            testSession = testSession
+        ) { updatedSession ->
+            viewModel.updateTestSession(updatedSession)
+            Snackbar.make(binding.root, "Test session updated", Snackbar.LENGTH_SHORT).show()
+        }
+        dialog.show(parentFragmentManager, "edit_test_session")
+    }
+
+    private fun showDeleteConfirmationDialog(testSession: com.example.jugglingtracker.data.entities.TestSession) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Delete Test Session")
+            .setMessage("Are you sure you want to delete this test session? This action cannot be undone.")
+            .setPositiveButton("Delete") { _, _ ->
+                viewModel.deleteTestSession(testSession)
+                Snackbar.make(binding.root, "Test session deleted", Snackbar.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun showNoDataState() {

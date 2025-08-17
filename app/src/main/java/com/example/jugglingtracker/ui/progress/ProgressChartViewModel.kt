@@ -76,7 +76,7 @@ class ProgressChartViewModel(
         lengthFilter?.let { filter ->
             filtered = when (filter) {
                 TestLengthFilter.SHORT -> filtered.filter { it.duration <= 5 * 60 * 1000L } // <= 5 minutes
-                TestLengthFilter.MEDIUM -> filtered.filter { it.duration in (5 * 60 * 1000L)..(15 * 60 * 1000L) } // 5-15 minutes
+                TestLengthFilter.MEDIUM -> filtered.filter { it.duration > 5 * 60 * 1000L && it.duration <= 15 * 60 * 1000L } // > 5 and <= 15 minutes
                 TestLengthFilter.LONG -> filtered.filter { it.duration > 15 * 60 * 1000L } // > 15 minutes
             }
         }
@@ -367,6 +367,42 @@ class ProgressChartViewModel(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
+
+    /**
+     * Delete a test session
+     */
+    fun deleteTestSession(testSession: TestSession) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true)
+            
+            val result = testSessionRepository.deleteTestSession(testSession)
+            
+            _uiState.value = _uiState.value.copy(
+                isLoading = false,
+                error = if (result.isFailure) {
+                    "Failed to delete test session: ${result.exceptionOrNull()?.message}"
+                } else null
+            )
+        }
+    }
+
+    /**
+     * Update a test session
+     */
+    fun updateTestSession(testSession: TestSession) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true)
+            
+            val result = testSessionRepository.updateTestSession(testSession)
+            
+            _uiState.value = _uiState.value.copy(
+                isLoading = false,
+                error = if (result.isFailure) {
+                    "Failed to update test session: ${result.exceptionOrNull()?.message}"
+                } else null
+            )
+        }
+    }
 
     /**
      * Clear error message

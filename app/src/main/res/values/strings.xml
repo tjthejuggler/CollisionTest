@@ -34,6 +34,7 @@
     <string name="button_clone">Clone</string>
     <string name="button_save_pattern">Save Pattern</string>
     <string name="button_save">Save</string>
+    <string name="button_submit_test">Submit Test</string>
     <string name="button_cancel">Cancel</string>
     <string name="button_delete">Delete</string>
     <string name="button_add">Add</string>
