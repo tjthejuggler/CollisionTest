@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PowerSettingsNew
+import androidx.compose.material.icons.filled.VideoCall
+import androidx.compose.material.icons.filled.FiberManualRecord
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,11 +21,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.*
 import com.example.watchimurecorder.R
+import com.example.watchimurecorder.data.AppMode
 import kotlin.math.abs
 
 @Composable
 fun SwipeToRevealMenu(
     modifier: Modifier = Modifier,
+    currentMode: AppMode,
+    onModeToggle: (AppMode) -> Unit,
     onShutdown: () -> Unit,
     content: @Composable () -> Unit
 ) {
@@ -60,8 +65,34 @@ fun SwipeToRevealMenu(
             ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+                    // Mode toggle button
+                    Button(
+                        onClick = {
+                            val newMode = if (currentMode == AppMode.RECORD) AppMode.STREAM else AppMode.RECORD
+                            onModeToggle(newMode)
+                        },
+                        modifier = Modifier.size(48.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = if (currentMode == AppMode.STREAM) Color.Blue else Color.Green
+                        ),
+                        shape = CircleShape
+                    ) {
+                        Icon(
+                            imageVector = if (currentMode == AppMode.STREAM) Icons.Default.FiberManualRecord else Icons.Default.VideoCall,
+                            contentDescription = "Toggle Mode",
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    
+                    Text(
+                        text = if (currentMode == AppMode.STREAM) "Record" else "Stream",
+                        style = MaterialTheme.typography.caption2,
+                        color = Color.White
+                    )
+                    
                     // Shutdown button
                     Button(
                         onClick = {

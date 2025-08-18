@@ -32,11 +32,14 @@ import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import androidx.wear.compose.material.*
+import com.example.watchimurecorder.data.AppMode
 import com.example.watchimurecorder.data.RecordingState
 import com.example.watchimurecorder.data.ServerStatus
+import com.example.watchimurecorder.data.StreamingStatus
 import com.example.watchimurecorder.presentation.theme.JugglingTrackerTheme
 import com.example.watchimurecorder.services.HttpServerService
 import com.example.watchimurecorder.services.IMUDataService
+import com.example.watchimurecorder.services.WebSocketStreamingService
 import kotlinx.coroutines.launch
 import kotlin.system.exitProcess
 
@@ -58,9 +61,14 @@ class MainActivity : ComponentActivity() {
 
     private var httpServerService: HttpServerService? = null
     private var imuDataService: IMUDataService? = null
+    private var webSocketStreamingService: WebSocketStreamingService? = null
     
     private var httpServiceConnection: ServiceConnection? = null
     private var imuServiceConnection: ServiceConnection? = null
+    private var streamingServiceConnection: ServiceConnection? = null
+    
+    // Current app mode
+    private var currentMode by mutableStateOf(AppMode.RECORD)
 
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -86,6 +94,10 @@ class MainActivity : ComponentActivity() {
         
         setContent {
             SwipeToRevealMenu(
+                currentMode = currentMode,
+                onModeToggle = { newMode ->
+                    switchMode(newMode)
+                },
                 onShutdown = {
                     shutdownApp()
                 }
@@ -117,7 +129,7 @@ class MainActivity : ComponentActivity() {
     private fun startServices() {
         Log.d(TAG, "Starting services")
         
-        // Start and bind to HTTP Server Service
+        // Start and bind to HTTP Server Service (for record mode)
         httpServiceConnection = object : ServiceConnection {
             override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
                 try {
@@ -125,20 +137,19 @@ class MainActivity : ComponentActivity() {
                     httpServerService = binder.getService()
                     Log.d(TAG, "Connected to HttpServerService successfully")
                     
-                    // Give the service a moment to fully initialize before refreshing status
-                    lifecycleScope.launch {
-                        kotlinx.coroutines.delay(500) // Wait 500ms for service initialization
-                        Log.d(TAG, "Refreshing server status after service connection")
-                        httpServerService?.refreshServerStatus()
-                        
-                        // Only try to start server if it's not already running
-                        val currentStatus = httpServerService?.serverStatus?.value
-                        if (currentStatus?.isRunning != true) {
-                            Log.d(TAG, "Auto-starting server after service connection")
-                            val success = httpServerService?.startServer() ?: false
-                            Log.d(TAG, "Auto-start server result: $success")
-                        } else {
-                            Log.d(TAG, "Server already running, skipping auto-start")
+                    // Only auto-start if in record mode
+                    if (currentMode == AppMode.RECORD) {
+                        lifecycleScope.launch {
+                            kotlinx.coroutines.delay(500)
+                            Log.d(TAG, "Refreshing server status after service connection")
+                            httpServerService?.refreshServerStatus()
+                            
+                            val currentStatus = httpServerService?.serverStatus?.value
+                            if (currentStatus?.isRunning != true) {
+                                Log.d(TAG, "Auto-starting HTTP server for record mode")
+                                val success = httpServerService?.startServer() ?: false
+                                Log.d(TAG, "Auto-start HTTP server result: $success")
+                            }
                         }
                     }
                 } catch (e: Exception) {
@@ -152,7 +163,7 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        // Start and bind to IMU Data Service
+        // Start and bind to IMU Data Service (for record mode)
         imuServiceConnection = object : ServiceConnection {
             override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
                 try {
@@ -170,20 +181,99 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        // Start services
+        // Start and bind to WebSocket Streaming Service (for stream mode)
+        streamingServiceConnection = object : ServiceConnection {
+            override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+                try {
+                    val binder = service as WebSocketStreamingService.LocalBinder
+                    webSocketStreamingService = binder.getService()
+                    Log.d(TAG, "Connected to WebSocketStreamingService successfully")
+                    
+                    // Only auto-start if in stream mode
+                    if (currentMode == AppMode.STREAM) {
+                        lifecycleScope.launch {
+                            kotlinx.coroutines.delay(500)
+                            Log.d(TAG, "Auto-starting WebSocket streaming for stream mode")
+                            val success = webSocketStreamingService?.startStreaming() ?: false
+                            Log.d(TAG, "Auto-start streaming result: $success")
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error connecting to WebSocketStreamingService", e)
+                }
+            }
+
+            override fun onServiceDisconnected(name: ComponentName?) {
+                webSocketStreamingService = null
+                Log.d(TAG, "Disconnected from WebSocketStreamingService")
+            }
+        }
+
+        // Start all services
         val httpIntent = Intent(this, HttpServerService::class.java)
         val imuIntent = Intent(this, IMUDataService::class.java)
+        val streamingIntent = Intent(this, WebSocketStreamingService::class.java)
         
         Log.d(TAG, "Starting foreground services...")
         startForegroundService(httpIntent)
         startForegroundService(imuIntent)
+        startForegroundService(streamingIntent)
         
         Log.d(TAG, "Binding to services...")
         val httpBound = bindService(httpIntent, httpServiceConnection!!, Context.BIND_AUTO_CREATE)
         val imuBound = bindService(imuIntent, imuServiceConnection!!, Context.BIND_AUTO_CREATE)
+        val streamingBound = bindService(streamingIntent, streamingServiceConnection!!, Context.BIND_AUTO_CREATE)
         
         Log.d(TAG, "HTTP service bind result: $httpBound")
         Log.d(TAG, "IMU service bind result: $imuBound")
+        Log.d(TAG, "Streaming service bind result: $streamingBound")
+    }
+    
+    private fun switchMode(newMode: AppMode) {
+        if (currentMode == newMode) return
+        
+        Log.d(TAG, "Switching mode from $currentMode to $newMode")
+        
+        lifecycleScope.launch {
+            try {
+                // Stop current mode services
+                when (currentMode) {
+                    AppMode.RECORD -> {
+                        // Stop recording if active
+                        if (imuDataService?.recordingState?.value == RecordingState.RECORDING) {
+                            imuDataService?.stopRecording()
+                            kotlinx.coroutines.delay(1000)
+                        }
+                        // Stop HTTP server
+                        httpServerService?.stopServer()
+                    }
+                    AppMode.STREAM -> {
+                        // Stop streaming
+                        webSocketStreamingService?.stopStreaming()
+                    }
+                }
+                
+                // Switch mode
+                currentMode = newMode
+                
+                // Start new mode services
+                when (newMode) {
+                    AppMode.RECORD -> {
+                        kotlinx.coroutines.delay(500)
+                        httpServerService?.startServer()
+                    }
+                    AppMode.STREAM -> {
+                        kotlinx.coroutines.delay(500)
+                        webSocketStreamingService?.startStreaming()
+                    }
+                }
+                
+                Log.d(TAG, "Mode switched to $newMode successfully")
+                
+            } catch (e: Exception) {
+                Log.e(TAG, "Error switching mode", e)
+            }
+        }
     }
 
     @Composable
@@ -192,17 +282,30 @@ class MainActivity : ComponentActivity() {
         var debugInfo by remember { mutableStateOf("Starting...") }
         
         // Periodic status refresh to ensure UI stays updated
-        LaunchedEffect(Unit) {
+        LaunchedEffect(currentMode) {
             while (true) {
                 kotlinx.coroutines.delay(2000) // Refresh every 2 seconds
-                httpServerService?.let { service ->
-                    Log.d(TAG, "Periodic status refresh")
-                    service.refreshServerStatus()
-                    val status = service.serverStatus.value
-                    val connected = service.isClientConnected.value
-                    debugInfo = "Server: ${if (status.isRunning) "Running" else "Stopped"}, PC: ${if (connected) "Connected" else "Disconnected"}, IP: ${status.ipAddress}"
-                } ?: run {
-                    debugInfo = "Service not connected"
+                when (currentMode) {
+                    AppMode.RECORD -> {
+                        httpServerService?.let { service ->
+                            Log.d(TAG, "Periodic status refresh - Record mode")
+                            service.refreshServerStatus()
+                            val status = service.serverStatus.value
+                            val connected = service.isClientConnected.value
+                            debugInfo = "Mode: Record | Server: ${if (status.isRunning) "Running" else "Stopped"}, PC: ${if (connected) "Connected" else "Disconnected"}"
+                        } ?: run {
+                            debugInfo = "Mode: Record | Service not connected"
+                        }
+                    }
+                    AppMode.STREAM -> {
+                        webSocketStreamingService?.let { service ->
+                            Log.d(TAG, "Periodic status refresh - Stream mode")
+                            val status = service.streamingStatus.value
+                            debugInfo = "Mode: Stream | Streaming: ${if (status.isStreaming) "Active" else "Inactive"}, Clients: ${status.connectedClients}"
+                        } ?: run {
+                            debugInfo = "Mode: Stream | Service not connected"
+                        }
+                    }
                 }
             }
         }
@@ -219,9 +322,9 @@ class MainActivity : ComponentActivity() {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Title
+                // Title with current mode
                 Text(
-                    text = "IMU Logger",
+                    text = "IMU ${currentMode.name.lowercase().replaceFirstChar { it.uppercase() }}",
                     style = MaterialTheme.typography.title2,
                     color = MaterialTheme.colors.onBackground,
                     textAlign = TextAlign.Center
@@ -237,18 +340,32 @@ class MainActivity : ComponentActivity() {
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Server Status
-                ServerStatusCard()
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Recording Status
-                RecordingStatusCard()
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Manual Controls
-                ManualControlsCard()
+                // Mode-specific status cards
+                when (currentMode) {
+                    AppMode.RECORD -> {
+                        // Server Status
+                        ServerStatusCard()
+                        
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        // Recording Status
+                        RecordingStatusCard()
+                        
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        // Manual Controls
+                        ManualControlsCard()
+                    }
+                    AppMode.STREAM -> {
+                        // Streaming Status
+                        StreamingStatusCard()
+                        
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        // Streaming Controls
+                        StreamingControlsCard()
+                    }
+                }
             }
         }
     }
@@ -647,6 +764,268 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    @Composable
+    fun StreamingStatusCard() {
+        var streamingStatus by remember { mutableStateOf(StreamingStatus(false, 0, 8081)) }
+        var lastUpdate by remember { mutableStateOf(0L) }
+
+        // Force recomposition every 2 seconds
+        LaunchedEffect(Unit) {
+            while (true) {
+                kotlinx.coroutines.delay(2000)
+                webSocketStreamingService?.let { service ->
+                    val newStatus = service.streamingStatus.value
+                    if (newStatus != streamingStatus) {
+                        streamingStatus = newStatus
+                        lastUpdate = System.currentTimeMillis()
+                        Log.d(TAG, "StreamingStatusCard - Forced update: $newStatus")
+                    }
+                }
+            }
+        }
+
+        // Collect streaming status
+        LaunchedEffect(webSocketStreamingService) {
+            webSocketStreamingService?.let { service ->
+                // Get initial value
+                streamingStatus = service.streamingStatus.value
+                lastUpdate = System.currentTimeMillis()
+                Log.d(TAG, "Initial streaming status: $streamingStatus")
+                
+                // Collect updates
+                service.streamingStatus.collect { status ->
+                    streamingStatus = status
+                    lastUpdate = System.currentTimeMillis()
+                    Log.d(TAG, "UI StreamingStatusCard - Status updated to: $status")
+                }
+            }
+        }
+
+        Card(
+            onClick = { },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Streaming Status",
+                    style = MaterialTheme.typography.title3,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .background(
+                                color = if (streamingStatus.isStreaming) Color.Green else Color.Red,
+                                shape = CircleShape
+                            )
+                    )
+                    Text(
+                        text = if (streamingStatus.isStreaming) "Active" else "Inactive",
+                        style = MaterialTheme.typography.body2
+                    )
+                }
+
+                if (streamingStatus.isStreaming) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "ws://[IP]:${streamingStatus.serverPort}/imu",
+                        style = MaterialTheme.typography.body2,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center
+                    )
+                    
+                    // Show connected clients
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(6.dp)
+                                .background(
+                                    color = if (streamingStatus.connectedClients > 0) Color.Blue else Color.Gray,
+                                    shape = CircleShape
+                                )
+                        )
+                        Text(
+                            text = "Clients: ${streamingStatus.connectedClients}",
+                            style = MaterialTheme.typography.body2,
+                            color = if (streamingStatus.connectedClients > 0) Color.Blue else Color.Gray
+                        )
+                    }
+                } else {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Button(
+                        onClick = {
+                            Log.d(TAG, "Manual streaming start button clicked")
+                            Log.d(TAG, "webSocketStreamingService is null: ${webSocketStreamingService == null}")
+                            
+                            if (webSocketStreamingService == null) {
+                                Log.e(TAG, "WebSocketStreamingService not connected! Attempting to reconnect...")
+                                startServices()
+                            } else {
+                                lifecycleScope.launch {
+                                    Log.d(TAG, "Calling startStreaming() on webSocketStreamingService")
+                                    val success = webSocketStreamingService?.startStreaming() ?: false
+                                    Log.d(TAG, "Manual streaming start result: $success")
+                                }
+                            }
+                        },
+                        modifier = Modifier.size(width = 80.dp, height = 24.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = Color.Blue
+                        )
+                    ) {
+                        Text(
+                            text = "Start",
+                            style = MaterialTheme.typography.body2,
+                            color = Color.White
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun StreamingControlsCard() {
+        var streamingStatus by remember { mutableStateOf(StreamingStatus(false, 0, 8081)) }
+        var lastUpdate by remember { mutableStateOf(0L) }
+
+        // Force recomposition every 2 seconds
+        LaunchedEffect(Unit) {
+            while (true) {
+                kotlinx.coroutines.delay(2000)
+                webSocketStreamingService?.let { service ->
+                    val newStatus = service.streamingStatus.value
+                    if (newStatus != streamingStatus) {
+                        streamingStatus = newStatus
+                        lastUpdate = System.currentTimeMillis()
+                        Log.d(TAG, "StreamingControlsCard - Forced update: $newStatus")
+                    }
+                }
+            }
+        }
+
+        // Collect streaming status
+        LaunchedEffect(webSocketStreamingService) {
+            webSocketStreamingService?.let { service ->
+                // Get initial value
+                streamingStatus = service.streamingStatus.value
+                lastUpdate = System.currentTimeMillis()
+                Log.d(TAG, "Initial streaming controls status: $streamingStatus")
+                
+                // Collect updates
+                service.streamingStatus.collect { status ->
+                    streamingStatus = status
+                    lastUpdate = System.currentTimeMillis()
+                    Log.d(TAG, "UI StreamingControlsCard - Status updated to: $status")
+                }
+            }
+        }
+
+        Card(
+            onClick = { },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Streaming Control",
+                    style = MaterialTheme.typography.title3,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    // Start Button
+                    Button(
+                        onClick = {
+                            Log.d(TAG, "Start streaming button clicked, current status: $streamingStatus")
+                            Log.d(TAG, "webSocketStreamingService is null: ${webSocketStreamingService == null}")
+                            
+                            if (webSocketStreamingService == null) {
+                                Log.e(TAG, "WebSocketStreamingService not connected!")
+                                return@Button
+                            }
+                            
+                            lifecycleScope.launch {
+                                val success = webSocketStreamingService?.startStreaming() ?: false
+                                Log.d(TAG, "Start streaming result: $success")
+                                
+                                // Give a moment for status to update
+                                kotlinx.coroutines.delay(100)
+                                val newStatus = webSocketStreamingService?.streamingStatus?.value
+                                Log.d(TAG, "Streaming status after start: $newStatus")
+                            }
+                        },
+                        enabled = !streamingStatus.isStreaming,
+                        modifier = Modifier.size(48.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = Color.Green
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.PlayArrow,
+                            contentDescription = "Start Streaming",
+                            tint = Color.White
+                        )
+                    }
+
+                    // Stop Button
+                    Button(
+                        onClick = {
+                            Log.d(TAG, "Stop streaming button clicked, current status: $streamingStatus")
+                            Log.d(TAG, "webSocketStreamingService is null: ${webSocketStreamingService == null}")
+                            
+                            if (webSocketStreamingService == null) {
+                                Log.e(TAG, "WebSocketStreamingService not connected!")
+                                return@Button
+                            }
+                            
+                            lifecycleScope.launch {
+                                val success = webSocketStreamingService?.stopStreaming() ?: false
+                                Log.d(TAG, "Stop streaming result: $success")
+                                
+                                // Give a moment for status to update
+                                kotlinx.coroutines.delay(100)
+                                val newStatus = webSocketStreamingService?.streamingStatus?.value
+                                Log.d(TAG, "Streaming status after stop: $newStatus")
+                            }
+                        },
+                        enabled = streamingStatus.isStreaming,
+                        modifier = Modifier.size(48.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = Color.Red
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Stop,
+                            contentDescription = "Stop Streaming",
+                            tint = Color.White
+                        )
+                    }
+                }
+            }
+        }
+    }
+
     private fun shutdownApp() {
         Log.d(TAG, "Shutdown requested")
         
@@ -670,13 +1049,24 @@ class MainActivity : ComponentActivity() {
                     }
                 }
                 
+                // Stop WebSocket streaming
+                webSocketStreamingService?.let { service ->
+                    if (service.streamingStatus.value.isStreaming) {
+                        Log.d(TAG, "Stopping WebSocket streaming before shutdown")
+                        service.stopStreaming()
+                        kotlinx.coroutines.delay(500) // Wait for streaming to stop
+                    }
+                }
+                
                 // Unbind services
                 httpServiceConnection?.let { unbindService(it) }
                 imuServiceConnection?.let { unbindService(it) }
-                
+                streamingServiceConnection?.let { unbindService(it) }
+
                 // Stop services
                 stopService(Intent(this@MainActivity, HttpServerService::class.java))
                 stopService(Intent(this@MainActivity, IMUDataService::class.java))
+                stopService(Intent(this@MainActivity, WebSocketStreamingService::class.java))
                 
                 Log.d(TAG, "Services stopped, finishing activity")
                 
@@ -699,5 +1089,6 @@ class MainActivity : ComponentActivity() {
         
         httpServiceConnection?.let { unbindService(it) }
         imuServiceConnection?.let { unbindService(it) }
+        streamingServiceConnection?.let { unbindService(it) }
     }
 }

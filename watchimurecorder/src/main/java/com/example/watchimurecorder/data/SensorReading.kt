@@ -76,3 +76,33 @@ data class ServerStatus(
     val port: Int,
     val recordingState: RecordingState = RecordingState.IDLE
 )
+
+/**
+ * Enum for app operating modes
+ */
+enum class AppMode {
+    RECORD,
+    STREAM
+}
+
+/**
+ * Data class for real-time streaming data (WebSocket format)
+ */
+@Serializable
+data class StreamingData(
+    val watch_id: String,
+    val type: String, // "accel" or "gyro"
+    val timestamp_ns: Long,
+    val x: Float,
+    val y: Float,
+    val z: Float
+)
+
+/**
+ * Data class for streaming status
+ */
+data class StreamingStatus(
+    val isStreaming: Boolean,
+    val connectedClients: Int,
+    val serverPort: Int = 8081
+)

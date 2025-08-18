@@ -74,6 +74,13 @@ dependencies {
     // HTTP Server - NanoHTTPD
     implementation("org.nanohttpd:nanohttpd:2.3.1")
     
+    // Ktor WebSocket Server for streaming
+    implementation("io.ktor:ktor-server-core:2.3.7")
+    implementation("io.ktor:ktor-server-cio:2.3.7")
+    implementation("io.ktor:ktor-server-websockets:2.3.7")
+    implementation("io.ktor:ktor-server-content-negotiation:2.3.7")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.7")
+    
     // JSON serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
     
