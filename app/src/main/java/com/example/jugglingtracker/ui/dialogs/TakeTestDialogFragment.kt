@@ -138,6 +138,12 @@ class TakeTestDialogFragment : DialogFragment() {
         elapsedTimeSeconds = (testSession.duration / 1000).toInt()
         updateTimerDisplay()
         binding.tvCountdownDisplay.text = "Original session time"
+        
+        // Ensure timer button is properly initialized for editing mode
+        binding.btnTimerToggle.text = getString(R.string.button_start_timer)
+        binding.btnTimerToggle.setIconResource(R.drawable.ic_play)
+        binding.btnTimerToggle.visibility = View.VISIBLE
+        binding.btnTimerToggle.isEnabled = true
     }
 
     private fun setupButtons() {
@@ -146,9 +152,15 @@ class TakeTestDialogFragment : DialogFragment() {
     }
     
     private fun setupTimerControls() {
-        // Ensure timer button is visible and enabled
+        // Ensure timer button is visible and enabled with proper initial state
         binding.btnTimerToggle.visibility = View.VISIBLE
         binding.btnTimerToggle.isEnabled = true
+        binding.btnTimerToggle.text = getString(R.string.button_start_timer)
+        binding.btnTimerToggle.setIconResource(R.drawable.ic_play)
+        
+        // Ensure countdown display is visible and shows ready state
+        binding.tvCountdownDisplay.visibility = View.VISIBLE
+        binding.tvCountdownDisplay.text = getString(R.string.timer_ready)
         
         binding.btnTimerToggle.setOnClickListener {
             if (isTimerRunning) {

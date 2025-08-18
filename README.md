@@ -1,6 +1,6 @@
 # Juggling Progress Tracker
 
-*Last updated: 2025-08-16T10:59:00Z*
+*Last updated: 2025-08-17T12:47:00Z*
 
 ## Overview
 
@@ -960,3 +960,57 @@ The shutdown process includes:
 - **Shutdown Process**: Safe service termination and app exit functionality verified
 
 This implementation provides users with an intuitive way to safely shut down the watch app without relying on hardware buttons or system navigation, ensuring proper cleanup of all background services and data recording processes.
+
+## Test Session Timer Button Fix
+
+### Issue Resolution
+*Fixed on 2025-08-17T12:47:00Z*
+
+#### Problem Identified
+The test session dialog popup had a timer that was stuck at 00:00 with missing start/stop buttons. Users reported that the timer functionality was not working properly, preventing them from timing their practice sessions accurately.
+
+#### Root Cause Analysis
+Investigation revealed that the timer button initialization was incomplete in certain scenarios:
+- **New Test Sessions**: Timer button was properly initialized in [`setupTimerControls()`](app/src/main/java/com/example/jugglingtracker/ui/dialogs/TakeTestDialogFragment.kt:148-175)
+- **Editing Existing Sessions**: Timer button state was not properly reset when populating fields from existing test session data
+- **Button State**: The button visibility and initial state were not consistently set across all dialog initialization paths
+
+#### Solution Implemented
+Enhanced the timer button initialization in [`TakeTestDialogFragment.kt`](app/src/main/java/com/example/jugglingtracker/ui/dialogs/TakeTestDialogFragment.kt) with the following improvements:
+
+1. **Enhanced `setupTimerControls()` Method**:
+   - Added explicit button text and icon initialization
+   - Ensured countdown display visibility and proper ready state
+   - Improved button state consistency
+
+2. **Fixed `populateFieldsFromTestSession()` Method**:
+   - Added timer button initialization for editing mode
+   - Ensured button visibility and enabled state
+   - Set proper initial button text and icon
+
+3. **Consistent Button State**:
+   - Timer button now shows "Start" text with play icon initially
+   - Countdown display shows "Ready to start" message
+   - Button is always visible and enabled when dialog opens
+
+#### Technical Changes
+- **Button Initialization**: Added explicit calls to set button text, icon, visibility, and enabled state
+- **Display State**: Ensured countdown display is visible with appropriate ready message
+- **Cross-mode Compatibility**: Timer works consistently for both new tests and editing existing sessions
+
+#### Files Modified
+- [`app/src/main/java/com/example/jugglingtracker/ui/dialogs/TakeTestDialogFragment.kt`](app/src/main/java/com/example/jugglingtracker/ui/dialogs/TakeTestDialogFragment.kt): Enhanced timer button initialization logic
+
+#### Verification
+- **Build Success**: Project compiles successfully with `./gradlew assembleDebug`
+- **Button Visibility**: Timer button now appears consistently in all dialog scenarios
+- **Functionality**: Start/stop timer functionality works as expected
+- **UI State**: Timer display shows 00:00 initially with proper start button
+
+#### User Experience Improvements
+- **Consistent Interface**: Timer controls now appear reliably in the test session dialog
+- **Clear Feedback**: Button states and countdown messages provide clear user guidance
+- **Reliable Timing**: Users can now properly time their practice sessions
+- **Cross-scenario Support**: Timer works for both new test creation and editing existing sessions
+
+This fix ensures that the timer functionality in the test session dialog works consistently, allowing users to accurately time their juggling practice sessions regardless of whether they're creating new tests or editing existing ones.
