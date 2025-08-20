@@ -4,10 +4,10 @@
     <selectionStates>
       <SelectionState runConfigName="watchimurecorder">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-08-18T10:23:34.214348153Z">
+        <DropdownSelection timestamp="2025-08-19T09:22:20.952813739Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="Default" identifier="serial=10.200.169.205:34437;connection=4af1af91" />
+              <DeviceId pluginId="Default" identifier="serial=10.200.169.205:39745;connection=1e460608" />
             </handle>
           </Target>
         </DropdownSelection>

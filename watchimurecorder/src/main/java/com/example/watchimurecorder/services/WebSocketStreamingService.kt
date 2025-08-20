@@ -382,6 +382,8 @@ class WebSocketStreamingService : Service(), SensorEventListener {
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
                 description = "Shows when WebSocket streaming is active"
+                enableVibration(false)
+                setSound(null, null)
             }
 
             val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -399,9 +401,10 @@ class WebSocketStreamingService : Service(), SensorEventListener {
     }
 
     private fun updateNotification(content: String) {
-        val notification = createNotification(content)
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.notify(NOTIFICATION_ID, notification)
+        // Disabled to prevent repeated vibrations that interfere with IMU readings
+        // val notification = createNotification(content)
+        // val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        // notificationManager.notify(NOTIFICATION_ID, notification)
     }
 
     override fun onDestroy() {
