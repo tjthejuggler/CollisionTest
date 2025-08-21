@@ -25,10 +25,8 @@ class TakeTestDialogFragment : DialogFragment() {
     private var existingTestSession: TestSession? = null
     
     // Timer related variables
-    private var countdownTimer: CountDownTimer? = null
     private var testTimer: CountDownTimer? = null
     private var isTimerRunning = false
-    private var isCountdownRunning = false
     private var elapsedTimeSeconds = 0
     private var maxTestDurationSeconds = 0
 
@@ -140,10 +138,6 @@ class TakeTestDialogFragment : DialogFragment() {
         binding.tvCountdownDisplay.text = "Original session time"
         
         // Ensure timer button is properly initialized for editing mode
-        binding.btnTimerToggle.text = getString(R.string.button_start_timer)
-        binding.btnTimerToggle.setIconResource(R.drawable.ic_play)
-        binding.btnTimerToggle.visibility = View.VISIBLE
-        binding.btnTimerToggle.isEnabled = true
     }
 
     private fun setupButtons() {
@@ -152,32 +146,19 @@ class TakeTestDialogFragment : DialogFragment() {
     }
     
     private fun setupTimerControls() {
-        // Ensure timer button is visible and enabled with proper initial state
-        binding.btnTimerToggle.visibility = View.VISIBLE
-        binding.btnTimerToggle.isEnabled = true
-        binding.btnTimerToggle.text = getString(R.string.button_start_timer)
-        binding.btnTimerToggle.setIconResource(R.drawable.ic_play)
-        
         // Ensure countdown display is visible and shows ready state
         binding.tvCountdownDisplay.visibility = View.VISIBLE
         binding.tvCountdownDisplay.text = getString(R.string.timer_ready)
         
-        binding.btnTimerToggle.setOnClickListener {
+        binding.tvTimerDisplay.setOnClickListener {
             if (isTimerRunning) {
                 stopTimer()
             } else {
-                // Always reset to 0 when starting
-                elapsedTimeSeconds = 0
-                updateTimerDisplay()
-                startCountdown()
+                startTimer()
             }
         }
         
         // Set up hidden buttons for compatibility
-        binding.btnStartTimer.setOnClickListener { /* hidden */ }
-        binding.btnStopTimer.setOnClickListener { /* hidden */ }
-        binding.btnResetTimer.setOnClickListener { /* hidden */ }
-        binding.btnCancelTimer.setOnClickListener { /* hidden */ }
     }
 
     private fun updateMaxDurationFromChip() {
@@ -190,35 +171,12 @@ class TakeTestDialogFragment : DialogFragment() {
         }
     }
     
-    private fun startCountdown() {
-        if (isCountdownRunning || isTimerRunning) return
-        
-        isCountdownRunning = true
-        binding.btnTimerToggle.isEnabled = false
-        binding.tvCountdownDisplay.visibility = View.VISIBLE
-        
-        countdownTimer = object : CountDownTimer(5000, 1000) {
-            override fun onTick(millisUntilFinished: Long) {
-                val secondsLeft = (millisUntilFinished / 1000).toInt() + 1
-                binding.tvCountdownDisplay.text = getString(R.string.timer_countdown_format, secondsLeft)
-            }
-            
-            override fun onFinish() {
-                isCountdownRunning = false
-                binding.btnTimerToggle.isEnabled = true
-                binding.tvCountdownDisplay.visibility = View.GONE
-                startTimer()
-            }
-        }.start()
-    }
-    
     private fun startTimer() {
         if (isTimerRunning) return
         
         isTimerRunning = true
         elapsedTimeSeconds = 0
-        binding.btnTimerToggle.text = getString(R.string.button_stop_timer)
-        binding.btnTimerToggle.setIconResource(R.drawable.ic_pause)
+        updateTimerDisplay()
         binding.tvCountdownDisplay.text = getString(R.string.timer_running)
         binding.tvCountdownDisplay.visibility = View.VISIBLE
         
@@ -239,8 +197,6 @@ class TakeTestDialogFragment : DialogFragment() {
     private fun stopTimer() {
         testTimer?.cancel()
         isTimerRunning = false
-        binding.btnTimerToggle.text = getString(R.string.button_start_timer)
-        binding.btnTimerToggle.setIconResource(R.drawable.ic_play)
         binding.tvCountdownDisplay.text = getString(R.string.timer_stopped)
         updateTimerDisplay()
     }
@@ -248,8 +204,6 @@ class TakeTestDialogFragment : DialogFragment() {
     private fun cancelTimer() {
         stopAllTimers()
         elapsedTimeSeconds = 0
-        binding.btnTimerToggle.text = getString(R.string.button_start_timer)
-        binding.btnTimerToggle.setIconResource(R.drawable.ic_play)
         binding.tvCountdownDisplay.text = getString(R.string.timer_ready)
         binding.tvCountdownDisplay.visibility = View.VISIBLE
         updateTimerDisplay()
@@ -257,17 +211,13 @@ class TakeTestDialogFragment : DialogFragment() {
     
     private fun resetTimer() {
         elapsedTimeSeconds = 0
-        binding.btnTimerToggle.text = getString(R.string.button_start_timer)
-        binding.btnTimerToggle.setIconResource(R.drawable.ic_play)
         binding.tvCountdownDisplay.text = getString(R.string.timer_ready)
         binding.tvCountdownDisplay.visibility = View.VISIBLE
         updateTimerDisplay()
     }
     
     private fun stopAllTimers() {
-        countdownTimer?.cancel()
         testTimer?.cancel()
-        isCountdownRunning = false
         isTimerRunning = false
     }
     

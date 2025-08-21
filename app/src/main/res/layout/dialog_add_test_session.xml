@@ -132,22 +132,7 @@
             android:layout_marginBottom="12dp"
             android:visibility="visible" />
 
-        <!-- Single Timer Control Button -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center">
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_timer_toggle"
-                style="@style/Widget.Material3.Button.TonalButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/button_start_timer"
-                app:icon="@drawable/ic_play" />
-
-        </LinearLayout>
+        <!-- Timer is now clickable, button removed -->
 
         <!-- Hidden buttons for compatibility -->
         <com.google.android.material.button.MaterialButton
