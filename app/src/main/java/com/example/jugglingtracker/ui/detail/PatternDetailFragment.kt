@@ -289,9 +289,10 @@ class PatternDetailFragment : Fragment() {
         val pattern = patternEntity.pattern
         
         binding.apply {
-            // Pattern details - show description if available, otherwise show name
-            tvDescription.text = if (!pattern.description.isNullOrBlank()) {
-                pattern.description
+            tvPatternName.text = pattern.name
+             // Pattern details - show description if available, otherwise show name
+             tvDescription.text = if (!pattern.description.isNullOrBlank()) {
+                 pattern.description
             } else {
                 pattern.name
             }

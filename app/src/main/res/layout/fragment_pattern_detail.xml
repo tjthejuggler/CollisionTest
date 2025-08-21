@@ -16,10 +16,19 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="16dp">
+ 
+            <TextView
+                android:id="@+id/tv_pattern_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.Material3.HeadlineMedium"
+                android:textColor="@color/text_primary"
+                android:layout_marginBottom="16dp"
+                tools:text="3 Ball Cascade" />
 
-            <!-- Video Player Section -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
+             <!-- Video Player Section -->
+             <com.google.android.material.card.MaterialCardView
+                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 app:cardCornerRadius="12dp"
